@@ -10,6 +10,11 @@ import type {
 import type { salesByCategory, salesTrend, topSellingProducts } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
+/** `storeId` viaja como `string | undefined` en toda la app (viene de useParams/props opcionales). */
+export interface StoreScoped {
+  storeId?: string | undefined;
+}
+
 export interface StoreRepository {
   list(): Promise<Store[]>;
   getById(id: string): Promise<Store | undefined>;
@@ -17,31 +22,31 @@ export interface StoreRepository {
 }
 
 export interface ProductRepository {
-  list(filter?: { storeId?: string; category?: string }): Promise<Product[]>;
+  list(filter?: StoreScoped & { category?: string | undefined }): Promise<Product[]>;
   getById(id: string): Promise<Product | undefined>;
-  lowStock(threshold?: number, filter?: { storeId?: string }): Promise<Product[]>;
+  lowStock(threshold?: number, filter?: StoreScoped): Promise<Product[]>;
   create(input: Omit<Product, "id">): Promise<Product>;
   update(id: string, patch: Partial<Omit<Product, "id">>): Promise<Product>;
 }
 
 export interface OrderRepository {
-  list(filter?: { storeId?: string; status?: OrderStatus }): Promise<Order[]>;
+  list(filter?: StoreScoped & { status?: OrderStatus | undefined }): Promise<Order[]>;
   getById(id: string): Promise<Order | undefined>;
-  countByStatus(filter?: { storeId?: string }): Promise<Record<OrderStatus, number>>;
+  countByStatus(filter?: StoreScoped): Promise<Record<OrderStatus, number>>;
 }
 
 export interface CustomerRepository {
-  list(filter?: { storeId?: string }): Promise<Customer[]>;
+  list(filter?: StoreScoped): Promise<Customer[]>;
   getById(id: string): Promise<Customer | undefined>;
 }
 
 export interface InvoiceRepository {
-  list(filter?: { storeId?: string }): Promise<Invoice[]>;
+  list(filter?: StoreScoped): Promise<Invoice[]>;
   paymentMethodStats(): Promise<typeof paymentMethodStats>;
 }
 
 export interface UserRepository {
-  list(filter?: { storeId?: string }): Promise<AppUser[]>;
+  list(filter?: StoreScoped): Promise<AppUser[]>;
   getById(id: string): Promise<AppUser | undefined>;
 }
 

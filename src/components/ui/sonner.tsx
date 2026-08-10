@@ -13,6 +13,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
+      {...props}
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
@@ -30,7 +31,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }
-      {...props}
     />
   )
 }
