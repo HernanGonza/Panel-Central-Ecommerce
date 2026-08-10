@@ -6,3 +6,4 @@ export * from "./invoice";
 export * from "./user";
 export * from "./promotion";
 export * from "./supplier";
+export * from "./shipping-provider";

@@ -19,8 +19,10 @@ import { useCreateSupplier } from "@/features/suppliers/hooks";
 
 const schema = z.object({
   name: z.string().min(2, "Ingresá un nombre"),
+  contactName: z.string(),
   contactPhone: z.string(),
   contactEmail: z.string(),
+  address: z.string(),
 });
 
 export function SupplierDialog() {
@@ -28,17 +30,19 @@ export function SupplierDialog() {
   const createSupplier = useCreateSupplier();
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", contactPhone: "", contactEmail: "" },
+    defaultValues: { name: "", contactName: "", contactPhone: "", contactEmail: "", address: "" },
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
     await createSupplier.mutateAsync({
       name: values.name,
+      contactName: values.contactName || undefined,
       contactPhone: values.contactPhone || undefined,
       contactEmail: values.contactEmail || undefined,
+      address: values.address || undefined,
     });
     toast.success(`${values.name} se agregó a proveedores`);
-    form.reset({ name: "", contactPhone: "", contactEmail: "" });
+    form.reset({ name: "", contactName: "", contactPhone: "", contactEmail: "", address: "" });
     setOpen(false);
   }
 
@@ -61,7 +65,7 @@ export function SupplierDialog() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre</FormLabel>
+                  <FormLabel>Empresa</FormLabel>
                   <FormControl>
                     <Input placeholder="Textil Andina" {...field} />
                   </FormControl>
@@ -71,25 +75,53 @@ export function SupplierDialog() {
             />
             <FormField
               control={form.control}
-              name="contactPhone"
+              name="contactName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Teléfono de contacto</FormLabel>
+                  <FormLabel>Persona de contacto</FormLabel>
                   <FormControl>
-                    <Input placeholder="+54 11 4000-0000" {...field} />
+                    <Input placeholder="Marcela Funes" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="contactPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+54 11 4000-0000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contactEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="ventas@proveedor.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
-              name="contactEmail"
+              name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email de contacto</FormLabel>
+                  <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="ventas@proveedor.com" {...field} />
+                    <Input placeholder="Av. Siempreviva 742, Ciudad" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

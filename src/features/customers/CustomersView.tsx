@@ -1,23 +1,15 @@
+import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCustomers } from "@/features/customers/hooks";
-import { useStores } from "@/features/stores/hooks";
+import { CustomerDetailDialog } from "@/features/customers/CustomerDetailDialog";
+import type { Customer } from "@/data/types";
 import { formatCurrency, formatNumber, formatRelativeDate } from "@/lib/format";
 
 export function CustomersView({ storeId }: { storeId?: string | undefined }) {
   const { data: customers = [] } = useCustomers({ storeId });
-  const { data: stores = [] } = useStores();
-
-  const storeNames = (ids: string[]) =>
-    ids.map((id) => stores.find((s) => s.id === id)?.name ?? id).join(", ");
+  const [selected, setSelected] = useState<Customer | null>(null);
 
   return (
     <>
@@ -26,7 +18,7 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
         subtitle={storeId ? "Clientes de esta tienda" : "Base consolidada por email y DNI/CUIT"}
       />
 
-      <SectionCard title="Clientes" subtitle={storeId ? undefined : "Base consolidada"}>
+      <SectionCard title="Clientes" subtitle="Tocá un cliente para ver la ficha completa">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -34,8 +26,6 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
                 <TableHead>Cliente</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Teléfono</TableHead>
-                <TableHead>DNI/CUIT</TableHead>
-                <TableHead>Tiendas</TableHead>
                 <TableHead>Compras</TableHead>
                 <TableHead>Gasto total</TableHead>
                 <TableHead className="text-right">Última compra</TableHead>
@@ -43,17 +33,11 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
             </TableHeader>
             <TableBody>
               {customers.map((customer) => (
-                <TableRow key={customer.id}>
+                <TableRow key={customer.id} onClick={() => setSelected(customer)} className="cursor-pointer">
                   <TableCell className="font-medium text-foreground">{customer.name}</TableCell>
                   <TableCell className="text-muted-foreground">{customer.email}</TableCell>
                   <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
-                  <TableCell className="text-muted-foreground">{customer.docId}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {storeNames(customer.storeIds)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatNumber(customer.purchasesCount)}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{formatNumber(customer.purchasesCount)}</TableCell>
                   <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">
                     {formatRelativeDate(customer.lastPurchaseAt)}
@@ -62,10 +46,7 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
               ))}
               {customers.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="py-10 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                     Todavía no hay clientes.
                   </TableCell>
                 </TableRow>
@@ -74,6 +55,8 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
           </Table>
         </div>
       </SectionCard>
+
+      <CustomerDetailDialog customer={selected} onOpenChange={(open) => !open && setSelected(null)} />
     </>
   );
 }

@@ -1,9 +1,9 @@
-export interface Supplier {
+export interface ShippingProvider {
   id: string;
   name: string;
-  /** Persona de contacto dentro de la empresa proveedora. */
   contactName?: string | undefined;
   contactPhone?: string | undefined;
   contactEmail?: string | undefined;
-  address?: string | undefined;
+  /** Zonas o modalidad que cubre (ej. "CABA y GBA, 24-48hs"). */
+  coverageArea?: string | undefined;
 }

@@ -22,7 +22,7 @@ export function Sidebar({
   const { session, logout } = useAuth();
 
   return (
-    <aside className="flex h-svh w-60 shrink-0 flex-col border-r border-border bg-card">
+    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex items-center gap-2.5 px-5 py-5">{brand}</div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">

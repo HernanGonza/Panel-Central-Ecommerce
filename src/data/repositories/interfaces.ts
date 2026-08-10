@@ -1,4 +1,15 @@
-import type { AppUser, Customer, Invoice, Order, OrderStatus, Product, Promotion, Store, Supplier } from "@/data/types";
+import type {
+  AppUser,
+  Customer,
+  Invoice,
+  Order,
+  OrderStatus,
+  Product,
+  Promotion,
+  ShippingProvider,
+  Store,
+  Supplier,
+} from "@/data/types";
 import type { salesByCategory, salesTrend } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
@@ -58,6 +69,11 @@ export interface CategoryRepository {
 export interface SupplierRepository {
   list(): Promise<Supplier[]>;
   create(input: Omit<Supplier, "id">): Promise<Supplier>;
+}
+
+export interface ShippingProviderRepository {
+  list(): Promise<ShippingProvider[]>;
+  create(input: Omit<ShippingProvider, "id">): Promise<ShippingProvider>;
 }
 
 export interface AnalyticsRepository {
