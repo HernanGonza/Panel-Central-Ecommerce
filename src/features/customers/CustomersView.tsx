@@ -5,7 +5,7 @@ import { useCustomers } from "@/features/customers/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { formatCurrency, formatNumber, formatRelativeDate } from "@/lib/format";
 
-export function CustomersView({ storeId }: { storeId?: string }) {
+export function CustomersView({ storeId }: { storeId?: string | undefined }) {
   const { data: customers = [] } = useCustomers({ storeId });
   const { data: stores = [] } = useStores();
 

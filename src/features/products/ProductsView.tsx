@@ -2,18 +2,21 @@ import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
+import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
-import { NewProductDialog } from "@/features/products/NewProductDialog";
+import { ProductDialog } from "@/features/products/ProductDialog";
 import { PRODUCT_CATEGORIES } from "@/data/fixtures/products";
 import { LOW_STOCK_THRESHOLD } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 const ALL = "__all__";
+const COLUMN_COUNT_SCOPED = 6;
+const COLUMN_COUNT_ALL = 7;
 
-export function ProductsView({ storeId }: { storeId?: string }) {
+export function ProductsView({ storeId }: { storeId?: string | undefined }) {
   const [category, setCategory] = useState<string>(ALL);
   const [storeFilter, setStoreFilter] = useState<string>(ALL);
   const { data: stores = [] } = useStores();
@@ -31,7 +34,7 @@ export function ProductsView({ storeId }: { storeId?: string }) {
       <PageHeader
         title={storeId ? "Catálogo" : "Productos"}
         subtitle={storeId ? "Productos de esta tienda" : "Catálogo consolidado de todas las tiendas"}
-        action={<NewProductDialog storeId={storeId} />}
+        action={<ProductDialog storeId={storeId} />}
       />
 
       <SectionCard
@@ -70,40 +73,58 @@ export function ProductsView({ storeId }: { storeId?: string }) {
           </div>
         }
       >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Producto</TableHead>
-              <TableHead>Categoría</TableHead>
-              {!storeId && <TableHead>Tienda</TableHead>}
-              <TableHead>Precio</TableHead>
-              <TableHead className="text-right">Stock</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium text-foreground">{product.name}</TableCell>
-                <TableCell className="text-muted-foreground">{product.category}</TableCell>
-                {!storeId && <TableCell className="text-muted-foreground">{storeName(product.storeId)}</TableCell>}
-                <TableCell>{formatCurrency(product.price)}</TableCell>
-                <TableCell className="text-right">
-                  <StatusPill
-                    label={`${formatNumber(product.stock)} u.`}
-                    tone={product.stock < LOW_STOCK_THRESHOLD ? "gold" : "success"}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-            {!isLoading && products.length === 0 && (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={storeId ? 4 : 5} className="py-10 text-center text-sm text-muted-foreground">
-                  No hay productos que coincidan con el filtro.
-                </TableCell>
+                <TableHead>Producto</TableHead>
+                <TableHead>Categoría</TableHead>
+                {!storeId && <TableHead>Tienda</TableHead>}
+                <TableHead>Proveedor</TableHead>
+                <TableHead>Costo</TableHead>
+                <TableHead>Precio</TableHead>
+                <TableHead className="text-right">Stock</TableHead>
+                <TableHead className="w-10" />
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <ProductThumbnail name={product.name} imageUrl={product.imageUrl} />
+                      <span className="font-medium text-foreground">{product.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{product.category}</TableCell>
+                  {!storeId && <TableCell className="text-muted-foreground">{storeName(product.storeId)}</TableCell>}
+                  <TableCell className="text-muted-foreground">{product.supplier}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatCurrency(product.cost)}</TableCell>
+                  <TableCell>{formatCurrency(product.price)}</TableCell>
+                  <TableCell className="text-right">
+                    <StatusPill
+                      label={`${formatNumber(product.stock)} u.`}
+                      tone={product.stock < LOW_STOCK_THRESHOLD ? "gold" : "success"}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ProductDialog product={product} />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {!isLoading && products.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={storeId ? COLUMN_COUNT_SCOPED : COLUMN_COUNT_ALL}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
+                    No hay productos que coincidan con el filtro.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </SectionCard>
     </>
   );

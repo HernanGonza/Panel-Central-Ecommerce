@@ -10,7 +10,7 @@ import { ORDER_STATUS_TONE } from "@/lib/status-tones";
 import { formatCurrency, formatRelativeDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export function OrdersView({ storeId }: { storeId?: string }) {
+export function OrdersView({ storeId }: { storeId?: string | undefined }) {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null);
   const { data: stores = [] } = useStores();
   const { data: statusCounts } = useOrderStatusCounts({ storeId });
