@@ -24,12 +24,15 @@ import {
 import { useProducts } from "@/features/products/hooks";
 import { useCreateCustomer, useCustomers } from "@/features/customers/hooks";
 import { useCreateOrder } from "@/features/orders/hooks";
+import { useCreateInvoice } from "@/features/billing/hooks";
 import { useAuth } from "@/auth/useAuth";
 import {
   ORDER_STATUS_LABEL,
   ORDER_STATUS_ORDER,
+  PAYMENT_METHOD_LABEL,
   type OrderItem,
   type OrderStatus,
+  type PaymentMethod,
 } from "@/data/types";
 import { formatCurrency } from "@/lib/format";
 
@@ -47,6 +50,8 @@ interface FormValues {
   newCustomerEmail: string;
   status: OrderStatus;
   lines: LineItem[];
+  paymentMethod: PaymentMethod;
+  paid: boolean;
 }
 
 const emptyDefaults: FormValues = {
@@ -56,6 +61,8 @@ const emptyDefaults: FormValues = {
   newCustomerEmail: "",
   status: "pendiente",
   lines: [{ productId: "", quantity: 1 }],
+  paymentMethod: "efectivo_local",
+  paid: true,
 };
 
 export function NewOrderDialog({ storeId }: { storeId: string }) {
@@ -65,12 +72,14 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
   const { data: customers = [] } = useCustomers({ storeId });
   const createOrder = useCreateOrder();
   const createCustomer = useCreateCustomer();
+  const createInvoice = useCreateInvoice();
 
   const form = useForm<FormValues>({ defaultValues: emptyDefaults });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "lines" });
 
   const customerId = form.watch("customerId");
   const lines = form.watch("lines");
+  const paid = form.watch("paid");
   const total = lines.reduce((sum, line) => {
     const product = products.find((p) => p.id === line.productId);
     return sum + (product ? product.price * (line.quantity || 0) : 0);
@@ -137,7 +146,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
       customerName = customers.find((c) => c.id === values.customerId)?.name ?? "Cliente";
     }
 
-    await createOrder.mutateAsync({
+    const order = await createOrder.mutateAsync({
       storeId,
       customerId: resolvedCustomerId,
       customerName,
@@ -147,7 +156,16 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
       sellerId: session?.user.id,
     });
 
-    toast.success(`Venta cargada para ${customerName}`);
+    const invoice = await createInvoice.mutateAsync({
+      storeId,
+      amount: orderTotal,
+      status: values.paid ? "pagado" : "pendiente",
+      method: values.paymentMethod,
+      date: new Date().toISOString(),
+      orderId: order.id,
+    });
+
+    toast.success(`Venta cargada para ${customerName} · comprobante ${invoice.id}`);
     form.reset(emptyDefaults);
     setOpen(false);
   }
@@ -260,21 +278,57 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Estado del pedido</Label>
+              <Select
+                value={form.watch("status")}
+                onValueChange={(v) => form.setValue("status", v as OrderStatus)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ORDER_STATUS_ORDER.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {ORDER_STATUS_LABEL[s]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Medio de pago</Label>
+              <Select
+                value={form.watch("paymentMethod")}
+                onValueChange={(v) => form.setValue("paymentMethod", v as PaymentMethod)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PAYMENT_METHOD_LABEL).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
-            <Label>Estado inicial</Label>
+            <Label>Estado del pago</Label>
             <Select
-              value={form.watch("status")}
-              onValueChange={(v) => form.setValue("status", v as OrderStatus)}
+              value={paid ? "pagado" : "pendiente"}
+              onValueChange={(v) => form.setValue("paid", v === "pagado")}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ORDER_STATUS_ORDER.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {ORDER_STATUS_LABEL[s]}
-                  </SelectItem>
-                ))}
+                <SelectItem value="pagado">Pagado</SelectItem>
+                <SelectItem value="pendiente">Pendiente (pago contra entrega)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -287,7 +341,12 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={createOrder.isPending || createCustomer.isPending}>
+            <Button
+              type="submit"
+              disabled={
+                createOrder.isPending || createCustomer.isPending || createInvoice.isPending
+              }
+            >
               Registrar venta
             </Button>
           </DialogFooter>

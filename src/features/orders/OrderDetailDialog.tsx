@@ -2,8 +2,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusPill } from "@/components/shared/StatusPill";
 import { useCustomer } from "@/features/customers/hooks";
 import { useStores } from "@/features/stores/hooks";
-import { ORDER_STATUS_LABEL, type Order } from "@/data/types";
-import { ORDER_STATUS_TONE } from "@/lib/status-tones";
+import { useInvoiceByOrder } from "@/features/billing/hooks";
+import { ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, type Order } from "@/data/types";
+import { ORDER_STATUS_TONE, INVOICE_STATUS_TONE } from "@/lib/status-tones";
 import { formatCurrency, formatNumber, formatRelativeDate } from "@/lib/format";
 
 export function OrderDetailDialog({
@@ -15,6 +16,7 @@ export function OrderDetailDialog({
 }) {
   const { data: customer } = useCustomer(order?.customerId);
   const { data: stores = [] } = useStores();
+  const { data: invoice } = useInvoiceByOrder(order?.id);
   const storeName = stores.find((s) => s.id === order?.storeId)?.name;
 
   return (
@@ -72,6 +74,30 @@ export function OrderDetailDialog({
                     </p>
                   )}
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-secondary/40 p-4">
+                <p className="text-xs font-medium text-muted-foreground">Comprobante</p>
+                {invoice ? (
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <div>
+                      <p className="font-display text-sm font-semibold text-foreground">
+                        {invoice.id}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {PAYMENT_METHOD_LABEL[invoice.method]}
+                      </p>
+                    </div>
+                    <StatusPill
+                      label={invoice.status === "pagado" ? "Pagado" : "Pendiente"}
+                      tone={INVOICE_STATUS_TONE[invoice.status]}
+                    />
+                  </div>
+                ) : (
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    Todavía no tiene comprobante asociado.
+                  </p>
+                )}
               </div>
 
               <div className="rounded-xl border border-border bg-secondary/40 p-4">

@@ -84,3 +84,27 @@ Auth. La interfaz `AuthService` (`src/auth/types.ts`) ya está pensada para
 eso — `login`/`logout`/`getSession` mapean 1:1 a los métodos de
 `supabase.auth`. El rol y las tiendas del usuario logueado salen de la fila
 correspondiente en `public.users`, no del JWT directamente.
+
+## Pagos (pendiente de definir pasarela)
+
+Hoy cada venta cargada desde "Nueva venta" genera un `Invoice` en el momento
+(`InvoiceRepository.create`, ver `NewOrderDialog.tsx`), con el medio de pago y
+el estado (pagado/pendiente) elegidos a mano por quien vende — porque todavía
+no hay pasarela conectada. `Invoice.orderId` ya vincula cada comprobante con
+su pedido.
+
+Cuando se conecte una pasarela real (Mercado Pago, Stripe, etc.):
+
+- El flujo pasa a ser: crear el pedido → crear el `Invoice` en estado
+  `pendiente` → redirigir/mostrar el checkout de la pasarela → un webhook de
+  la pasarela actualiza `Invoice.status` a `pagado` (o lo deja `pendiente` si
+  falla). El campo `paid` que hoy carga la persona a mano en el formulario
+  desaparece del form y pasa a ser responsabilidad del webhook.
+- El webhook necesita un endpoint — con Supabase, una Edge Function que reciba
+  la notificación de la pasarela, valide la firma, y haga el `update` del
+  `Invoice` correspondiente (matcheado por un `externalPaymentId` que habría
+  que agregar a la tabla).
+- Para venta en el local (efectivo/tarjeta física) el flujo actual —elegir
+  medio de pago y marcar pagado en el momento— sigue siendo válido tal cual;
+  la pasarela solo entra en juego para pagos que se procesan online (tienda
+  online futura, o un link de pago).

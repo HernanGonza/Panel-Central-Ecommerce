@@ -47,6 +47,8 @@ export interface CustomerRepository {
 
 export interface InvoiceRepository {
   list(filter?: StoreScoped): Promise<Invoice[]>;
+  getByOrderId(orderId: string): Promise<Invoice | undefined>;
+  create(input: Omit<Invoice, "id">): Promise<Invoice>;
   paymentMethodStats(): Promise<typeof paymentMethodStats>;
 }
 

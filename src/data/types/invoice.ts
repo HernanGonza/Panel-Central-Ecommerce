@@ -9,6 +9,8 @@ export interface Invoice {
   status: InvoiceStatus;
   method: PaymentMethod;
   date: string;
+  /** Pedido que generó este comprobante — vacío para comprobantes cargados a mano. */
+  orderId?: string | undefined;
 }
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
