@@ -31,6 +31,7 @@ export interface OrderRepository {
 export interface CustomerRepository {
   list(filter?: StoreScoped): Promise<Customer[]>;
   getById(id: string): Promise<Customer | undefined>;
+  create(input: Omit<Customer, "id">): Promise<Customer>;
 }
 
 export interface InvoiceRepository {
