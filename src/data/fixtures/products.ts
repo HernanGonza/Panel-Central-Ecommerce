@@ -9,6 +9,7 @@ export const products: Product[] = [
     price: 38_900,
     cost: 21_400,
     stock: 24,
+    unitsSold: 312,
     supplier: "Textil Andina",
   },
   {
@@ -19,6 +20,7 @@ export const products: Product[] = [
     price: 9_500,
     cost: 4_800,
     stock: 6,
+    unitsSold: 156,
     supplier: "Confecciones del Sur",
   },
   {
@@ -29,6 +31,7 @@ export const products: Product[] = [
     price: 27_300,
     cost: 15_100,
     stock: 41,
+    unitsSold: 189,
     supplier: "Denim Litoral",
   },
   {
@@ -39,6 +42,7 @@ export const products: Product[] = [
     price: 52_000,
     cost: 31_000,
     stock: 12,
+    unitsSold: 204,
     supplier: "Cuero & Cía.",
   },
   {
@@ -49,6 +53,7 @@ export const products: Product[] = [
     price: 31_400,
     cost: 17_200,
     stock: 3,
+    unitsSold: 94,
     supplier: "Import Urbano",
   },
   {
@@ -59,6 +64,7 @@ export const products: Product[] = [
     price: 22_800,
     cost: 12_600,
     stock: 58,
+    unitsSold: 268,
     supplier: "Confecciones del Sur",
   },
   {
@@ -69,6 +75,7 @@ export const products: Product[] = [
     price: 45_000,
     cost: 26_500,
     stock: 4,
+    unitsSold: 87,
     supplier: "Textil Andina",
   },
   {
@@ -79,6 +86,7 @@ export const products: Product[] = [
     price: 48_000,
     cost: 28_400,
     stock: 5,
+    unitsSold: 121,
     supplier: "Cuero & Cía.",
   },
   {
@@ -89,6 +97,7 @@ export const products: Product[] = [
     price: 24_000,
     cost: 13_300,
     stock: 7,
+    unitsSold: 143,
     supplier: "Manufactura Norte",
   },
 ];

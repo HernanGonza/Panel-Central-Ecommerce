@@ -1,10 +1,10 @@
 /**
- * Series agregadas para gráficos históricos (tendencia de ventas, ranking de
- * productos más vendidos, etc.). No se derivan de las entidades base porque
- * representarían meses de histórico transaccional que no tiene sentido
- * modelar a mano en un fixture — cuando conectemos Supabase, esto pasa a ser
- * una vista/consulta agregada real. El desglose de stock por categoría, en
- * cambio, sí se deriva en vivo de `Product` (ver features/stock).
+ * Series agregadas para gráficos históricos (tendencia de ventas). No se
+ * derivan de las entidades base porque representarían meses de histórico
+ * transaccional que no tiene sentido modelar a mano en un fixture — cuando
+ * conectemos Supabase, esto pasa a ser una vista/consulta agregada real. El
+ * desglose de stock por categoría y el ranking de más vendidos, en cambio,
+ * sí se derivan en vivo de `Product` (ver features/stock y features/reports).
  */
 
 export const salesTrend = [
@@ -27,11 +27,4 @@ export const salesByCategory = [
   { category: "Abrigo", pct: 24 },
   { category: "Pantalones", pct: 22 },
   { category: "Calzado", pct: 16 },
-];
-
-export const topSellingProducts = [
-  { product: "Campera de jean oversize", units: 312 },
-  { product: "Buzo canguro friza", units: 268 },
-  { product: "Zapatillas urbanas", units: 204 },
-  { product: "Jean recto tiro alto", units: 189 },
 ];

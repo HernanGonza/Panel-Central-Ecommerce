@@ -7,7 +7,7 @@ import type {
   Product,
   Store,
 } from "@/data/types";
-import type { salesByCategory, salesTrend, topSellingProducts } from "@/data/fixtures/analytics";
+import type { salesByCategory, salesTrend } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
 /** `storeId` viaja como `string | undefined` en toda la app (viene de useParams/props opcionales). */
@@ -33,6 +33,7 @@ export interface OrderRepository {
   list(filter?: StoreScoped & { status?: OrderStatus | undefined }): Promise<Order[]>;
   getById(id: string): Promise<Order | undefined>;
   countByStatus(filter?: StoreScoped): Promise<Record<OrderStatus, number>>;
+  create(input: Omit<Order, "id" | "createdAt">): Promise<Order>;
 }
 
 export interface CustomerRepository {
@@ -53,5 +54,4 @@ export interface UserRepository {
 export interface AnalyticsRepository {
   salesTrend(): Promise<typeof salesTrend>;
   salesByCategory(): Promise<typeof salesByCategory>;
-  topSellingProducts(): Promise<typeof topSellingProducts>;
 }

@@ -8,6 +8,8 @@ export interface Order {
   status: OrderStatus;
   total: number;
   createdAt: string;
+  /** Vendedor/gerente que cargó la venta — vacío para pedidos online. */
+  sellerId?: string | undefined;
 }
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {

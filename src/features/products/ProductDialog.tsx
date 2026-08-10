@@ -94,7 +94,7 @@ export function ProductDialog({ product, storeId }: { product?: Product; storeId
       await updateProduct.mutateAsync({ id: product.id, patch: values });
       toast.success(`${values.name} se actualizó`);
     } else {
-      await createProduct.mutateAsync(values);
+      await createProduct.mutateAsync({ ...values, unitsSold: 0 });
       toast.success(`${values.name} se agregó al catálogo`);
       form.reset({ name: "", category: "", storeId: storeId ?? "", supplier: "", price: 0, cost: 0, stock: 0 });
     }
