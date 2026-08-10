@@ -9,6 +9,23 @@ function customerName(id: string): string {
   return customers.find((c) => c.id === id)?.name ?? id;
 }
 
+/** Vendedores/gerentes que cargan ventas en cada tienda (ver fixtures/users.ts). */
+const STORE_SELLERS: Record<string, string[]> = {
+  norte: ["mdiaz", "nvera"],
+  centro: ["jrohm"],
+  sur: ["frios"],
+  este: ["smolina"],
+};
+const sellerCounters: Record<string, number> = {};
+
+function nextSellerId(storeId: string): string | undefined {
+  const sellers = STORE_SELLERS[storeId] ?? [];
+  if (sellers.length === 0) return undefined;
+  const count = sellerCounters[storeId] ?? 0;
+  sellerCounters[storeId] = count + 1;
+  return sellers[count % sellers.length];
+}
+
 function order(
   id: string,
   storeId: string,
@@ -17,7 +34,16 @@ function order(
   total: number,
   ago: number,
 ): Order {
-  return { id, storeId, customerId, customerName: customerName(customerId), status, total, createdAt: daysAgo(ago) };
+  return {
+    id,
+    storeId,
+    customerId,
+    customerName: customerName(customerId),
+    status,
+    total,
+    createdAt: daysAgo(ago),
+    sellerId: nextSellerId(storeId),
+  };
 }
 
 export const orders: Order[] = [
