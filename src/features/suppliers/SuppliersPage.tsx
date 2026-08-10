@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useSuppliers } from "@/features/suppliers/hooks";
 import { SupplierDialog } from "@/features/suppliers/SupplierDialog";
 import { SupplierDetailDialog } from "@/features/suppliers/SupplierDetailDialog";
@@ -13,7 +20,11 @@ export function SuppliersPage() {
 
   return (
     <>
-      <PageHeader title="Proveedores" subtitle="Proveedores del catálogo de productos" action={<SupplierDialog />} />
+      <PageHeader
+        title="Proveedores"
+        subtitle="Proveedores del catálogo de productos"
+        action={<SupplierDialog />}
+      />
 
       <SectionCard title="Proveedores" subtitle="Tocá uno para ver el detalle">
         <Table>
@@ -27,11 +38,21 @@ export function SuppliersPage() {
           </TableHeader>
           <TableBody>
             {suppliers.map((supplier) => (
-              <TableRow key={supplier.id} onClick={() => setSelected(supplier)} className="cursor-pointer">
+              <TableRow
+                key={supplier.id}
+                onClick={() => setSelected(supplier)}
+                className="cursor-pointer"
+              >
                 <TableCell className="font-medium text-foreground">{supplier.name}</TableCell>
-                <TableCell className="text-muted-foreground">{supplier.contactName || "—"}</TableCell>
-                <TableCell className="text-muted-foreground">{supplier.contactPhone || "—"}</TableCell>
-                <TableCell className="text-muted-foreground">{supplier.contactEmail || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {supplier.contactName || "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {supplier.contactPhone || "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {supplier.contactEmail || "—"}
+                </TableCell>
               </TableRow>
             ))}
             {suppliers.length === 0 && (
@@ -45,7 +66,10 @@ export function SuppliersPage() {
         </Table>
       </SectionCard>
 
-      <SupplierDetailDialog supplier={selected} onOpenChange={(open) => !open && setSelected(null)} />
+      <SupplierDetailDialog
+        supplier={selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      />
     </>
   );
 }

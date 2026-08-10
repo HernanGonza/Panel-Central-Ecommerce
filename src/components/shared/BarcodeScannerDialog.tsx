@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import Quagga from "@ericblade/quagga2";
 import { ScanLine } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 export function BarcodeScannerDialog({
@@ -73,9 +79,14 @@ export function BarcodeScannerDialog({
         {error ? (
           <p className="py-6 text-center text-sm text-muted-foreground">{error}</p>
         ) : (
-          <div ref={viewportRef} className="relative aspect-video overflow-hidden rounded-xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover [&>canvas]:hidden" />
+          <div
+            ref={viewportRef}
+            className="relative aspect-video overflow-hidden rounded-xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover [&>canvas]:hidden"
+          />
         )}
-        <p className="text-center text-xs text-muted-foreground">Apuntá la cámara al código de barras del producto.</p>
+        <p className="text-center text-xs text-muted-foreground">
+          Apuntá la cámara al código de barras del producto.
+        </p>
       </DialogContent>
     </Dialog>
   );

@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Download } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -26,6 +28,7 @@ import { useAuth } from "@/auth/useAuth";
 import { canManageCatalog } from "@/auth/permissions";
 import { LOW_STOCK_THRESHOLD, type Product } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
+import { downloadCsv } from "@/lib/csv";
 
 const ALL = "__all__";
 
@@ -46,6 +49,32 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
   });
 
   const storeName = (id: string) => stores.find((s) => s.id === id)?.name ?? id;
+
+  function handleExport() {
+    downloadCsv(
+      "productos",
+      [
+        { label: "Producto", key: "nombre" },
+        { label: "Categoría", key: "categoria" },
+        { label: "Tienda", key: "tienda" },
+        { label: "Proveedor", key: "proveedor" },
+        { label: "Costo", key: "costo" },
+        { label: "Precio", key: "precio" },
+        { label: "Stock", key: "stock" },
+        { label: "Código de barras", key: "codigo" },
+      ],
+      products.map((p) => ({
+        nombre: p.name,
+        categoria: p.category,
+        tienda: storeName(p.storeId),
+        proveedor: p.supplier,
+        costo: p.cost,
+        precio: p.price,
+        stock: p.stock,
+        codigo: p.barcode,
+      })),
+    );
+  }
 
   return (
     <>
@@ -90,6 +119,10 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
                 ))}
               </SelectContent>
             </Select>
+            <Button type="button" variant="outline" size="sm" onClick={handleExport}>
+              <Download className="size-3.5" />
+              Exportar CSV
+            </Button>
           </div>
         }
       >
@@ -109,7 +142,11 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
             </TableHeader>
             <TableBody>
               {products.map((product) => (
-                <TableRow key={product.id} onClick={() => setSelected(product)} className="cursor-pointer">
+                <TableRow
+                  key={product.id}
+                  onClick={() => setSelected(product)}
+                  className="cursor-pointer"
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <ProductThumbnail name={product.name} imageUrl={product.imageUrl} />

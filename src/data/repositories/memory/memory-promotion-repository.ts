@@ -8,7 +8,9 @@ let nextId = promotions.length + 1;
 
 export const memoryPromotionRepository: PromotionRepository = {
   async list(filter) {
-    const result = filter?.storeId ? promotions.filter((p) => p.storeId === filter.storeId) : promotions;
+    const result = filter?.storeId
+      ? promotions.filter((p) => p.storeId === filter.storeId)
+      : promotions;
     return delay([...result]);
   },
   async create(input) {

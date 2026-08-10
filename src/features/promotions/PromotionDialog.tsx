@@ -13,11 +13,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCreatePromotion, useUpdatePromotion } from "@/features/promotions/hooks";
+import { useCategories, useProducts } from "@/features/products/hooks";
 import { DISCOUNT_TYPE_LABEL, type Promotion } from "@/data/types";
+import { formatCurrency } from "@/lib/format";
+import { cn } from "@/lib/utils";
+
+type Scope = "store" | "category" | "products";
 
 const schema = z.object({
   title: z.string().min(2, "Ingresá un título"),
@@ -26,6 +44,9 @@ const schema = z.object({
   discountValue: z.number().positive("El descuento debe ser mayor a 0"),
   startDate: z.string(),
   endDate: z.string(),
+  scope: z.enum(["store", "category", "products"]),
+  category: z.string(),
+  productIds: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -34,10 +55,24 @@ function toDateInput(iso: string | undefined): string {
   return iso ? iso.slice(0, 10) : "";
 }
 
-export function PromotionDialog({ storeId, promotion }: { storeId: string; promotion?: Promotion }) {
+function scopeFromPromotion(promotion?: Promotion): Scope {
+  if (promotion?.productIds && promotion.productIds.length > 0) return "products";
+  if (promotion?.category) return "category";
+  return "store";
+}
+
+export function PromotionDialog({
+  storeId,
+  promotion,
+}: {
+  storeId: string;
+  promotion?: Promotion;
+}) {
   const [open, setOpen] = useState(false);
   const createPromotion = useCreatePromotion();
   const updatePromotion = useUpdatePromotion();
+  const { data: categories = [] } = useCategories();
+  const { data: storeProducts = [] } = useProducts({ storeId });
   const isEdit = promotion !== undefined;
 
   const form = useForm<FormValues>({
@@ -50,6 +85,9 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
           discountValue: promotion.discountValue,
           startDate: toDateInput(promotion.startDate),
           endDate: toDateInput(promotion.endDate),
+          scope: scopeFromPromotion(promotion),
+          category: promotion.category ?? "",
+          productIds: promotion.productIds ?? [],
         }
       : {
           title: "",
@@ -58,10 +96,33 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
           discountValue: 10,
           startDate: "",
           endDate: "",
+          scope: "store",
+          category: "",
+          productIds: [],
         },
   });
 
+  const scope = form.watch("scope");
+  const selectedProductIds = form.watch("productIds");
+
+  function toggleProduct(id: string) {
+    const current = form.getValues("productIds");
+    form.setValue(
+      "productIds",
+      current.includes(id) ? current.filter((p) => p !== id) : [...current, id],
+    );
+  }
+
   async function onSubmit(values: FormValues) {
+    if (values.scope === "category" && !values.category) {
+      form.setError("category", { message: "Elegí una categoría" });
+      return;
+    }
+    if (values.scope === "products" && values.productIds.length === 0) {
+      toast.error("Elegí al menos un producto");
+      return;
+    }
+
     const patch = {
       title: values.title,
       description: values.description,
@@ -69,6 +130,8 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
       discountValue: values.discountValue,
       startDate: values.startDate ? new Date(values.startDate).toISOString() : undefined,
       endDate: values.endDate ? new Date(values.endDate).toISOString() : undefined,
+      category: values.scope === "category" ? values.category : undefined,
+      productIds: values.scope === "products" ? values.productIds : undefined,
     };
 
     if (isEdit) {
@@ -77,7 +140,17 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
     } else {
       await createPromotion.mutateAsync({ ...patch, storeId, active: true });
       toast.success(`${values.title} se creó`);
-      form.reset({ title: "", description: "", discountType: "percentage", discountValue: 10, startDate: "", endDate: "" });
+      form.reset({
+        title: "",
+        description: "",
+        discountType: "percentage",
+        discountValue: 10,
+        startDate: "",
+        endDate: "",
+        scope: "store",
+        category: "",
+        productIds: [],
+      });
     }
     setOpen(false);
   }
@@ -97,7 +170,7 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar promoción" : "Nueva promoción"}</DialogTitle>
         </DialogHeader>
@@ -176,6 +249,89 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="scope"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alcance</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="store">Toda la tienda</SelectItem>
+                      <SelectItem value="category">Una categoría</SelectItem>
+                      <SelectItem value="products">Productos específicos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {scope === "category" && (
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoría</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Elegir" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {scope === "products" && (
+              <div className="space-y-1.5">
+                <FormLabel>Productos ({selectedProductIds.length} seleccionados)</FormLabel>
+                <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                  {storeProducts.map((p) => {
+                    const active = selectedProductIds.includes(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => toggleProduct(p.id)}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                          active ? "bg-accent/15 text-accent" : "hover:bg-secondary",
+                        )}
+                      >
+                        <span>{p.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatCurrency(p.price)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {storeProducts.length === 0 && (
+                    <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                      Esta tienda todavía no tiene productos.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -208,7 +364,10 @@ export function PromotionDialog({ storeId, promotion }: { storeId: string; promo
               Sin fechas, la promoción se prende y apaga solo manualmente desde la tarjeta.
             </p>
             <DialogFooter>
-              <Button type="submit" disabled={createPromotion.isPending || updatePromotion.isPending}>
+              <Button
+                type="submit"
+                disabled={createPromotion.isPending || updatePromotion.isPending}
+              >
                 {isEdit ? "Guardar cambios" : "Crear promoción"}
               </Button>
             </DialogFooter>

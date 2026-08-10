@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useShippingProviders } from "@/features/shipping/hooks";
 import { ShippingProviderDialog } from "@/features/shipping/ShippingProviderDialog";
 import { ShippingProviderDetailDialog } from "@/features/shipping/ShippingProviderDetailDialog";
@@ -30,10 +37,18 @@ export function ShippingProvidersPage() {
           </TableHeader>
           <TableBody>
             {providers.map((provider) => (
-              <TableRow key={provider.id} onClick={() => setSelected(provider)} className="cursor-pointer">
+              <TableRow
+                key={provider.id}
+                onClick={() => setSelected(provider)}
+                className="cursor-pointer"
+              >
                 <TableCell className="font-medium text-foreground">{provider.name}</TableCell>
-                <TableCell className="text-muted-foreground">{provider.contactName || "—"}</TableCell>
-                <TableCell className="text-muted-foreground">{provider.coverageArea || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {provider.contactName || "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {provider.coverageArea || "—"}
+                </TableCell>
               </TableRow>
             ))}
             {providers.length === 0 && (
@@ -47,7 +62,10 @@ export function ShippingProvidersPage() {
         </Table>
       </SectionCard>
 
-      <ShippingProviderDetailDialog provider={selected} onOpenChange={(open) => !open && setSelected(null)} />
+      <ShippingProviderDetailDialog
+        provider={selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      />
     </>
   );
 }

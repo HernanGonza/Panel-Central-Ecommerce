@@ -23,6 +23,11 @@ const CATEGORY_COLOR = [TONE_COLOR.clay, TONE_COLOR.teal, TONE_COLOR.gold, TONE_
 const ALL = "__all__";
 const TOP_PRODUCTS_LIMIT = 5;
 const TOP_CUSTOMERS_LIMIT = 5;
+const TOP_MARGIN_LIMIT = 5;
+
+function marginPct(price: number, cost: number): number {
+  return price > 0 ? ((price - cost) / price) * 100 : 0;
+}
 
 export function ReportsPage() {
   const { data: categories = [] } = useSalesByCategory();
@@ -63,6 +68,30 @@ export function ReportsPage() {
       })
       .sort((a, b) => b.total - a.total);
   }, [orders, users, stores]);
+
+  const marginByCategory = useMemo(() => {
+    const totals = new Map<string, { price: number; cost: number }>();
+    for (const p of products) {
+      const entry = totals.get(p.category) ?? { price: 0, cost: 0 };
+      entry.price += p.price;
+      entry.cost += p.cost;
+      totals.set(p.category, entry);
+    }
+    return [...totals.entries()]
+      .map(([category, { price, cost }]) => ({ category, margin: marginPct(price, cost) }))
+      .sort((a, b) => b.margin - a.margin);
+  }, [products]);
+
+  const topMarginProducts = useMemo(
+    () =>
+      [...products]
+        .map((p) => ({ ...p, margin: marginPct(p.price, p.cost) }))
+        .sort((a, b) => b.margin - a.margin)
+        .slice(0, TOP_MARGIN_LIMIT),
+    [products],
+  );
+
+  const maxMargin = Math.max(1, ...marginByCategory.map((c) => c.margin));
 
   return (
     <>
@@ -211,6 +240,62 @@ export function ReportsPage() {
                 </span>
               </li>
             ))}
+          </ol>
+        </SectionCard>
+
+        <SectionCard
+          title="Rentabilidad por categoría"
+          subtitle={
+            productStoreFilter === ALL
+              ? "Margen promedio, todas las tiendas"
+              : "Margen promedio de esta tienda"
+          }
+        >
+          <div className="space-y-4">
+            {marginByCategory.map((c) => (
+              <div key={c.category}>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{c.category}</span>
+                  <span className="font-semibold text-foreground">{c.margin.toFixed(0)} %</span>
+                </div>
+                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${(c.margin / maxMargin) * 100}%`,
+                      backgroundColor: TONE_COLOR.success,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {marginByCategory.length === 0 && (
+              <p className="text-sm text-muted-foreground">Sin datos para esta tienda.</p>
+            )}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Productos con mejor margen" subtitle="Precio vs. costo">
+          <ol className="space-y-4">
+            {topMarginProducts.map((p, i) => (
+              <li key={p.id} className="flex items-center gap-3">
+                <span className="font-display text-sm text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatCurrency(p.cost)} → {formatCurrency(p.price)}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-success">
+                  {p.margin.toFixed(0)} %
+                </span>
+              </li>
+            ))}
+            {topMarginProducts.length === 0 && (
+              <p className="text-sm text-muted-foreground">Sin datos para esta tienda.</p>
+            )}
           </ol>
         </SectionCard>
 

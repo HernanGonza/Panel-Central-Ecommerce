@@ -1,12 +1,27 @@
 import { Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ClipboardList, Package, Boxes, Users, BarChart3, Store, ArrowLeft, Percent } from "lucide-react";
+import {
+  ClipboardList,
+  Package,
+  Boxes,
+  Users,
+  BarChart3,
+  Store,
+  ArrowLeft,
+  Percent,
+} from "lucide-react";
 import { Sidebar, type SidebarNavItem } from "@/components/shared/Sidebar";
 import { repositories } from "@/data/repositories";
 import { useAuth } from "@/auth/useAuth";
 import { canViewReports, canViewStock } from "@/auth/permissions";
 import { isOwnerRole } from "@/data/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function StoreLayout() {
   const { storeId } = useParams<{ storeId: string }>();
@@ -24,15 +39,29 @@ export function StoreLayout() {
   const owner = role ? isOwnerRole(role) : false;
 
   const nav: SidebarNavItem[] = [
-    { to: `/tienda/${storeId}/pedidos`, label: "Pedidos", icon: <ClipboardList className="size-4" /> },
+    {
+      to: `/tienda/${storeId}/pedidos`,
+      label: "Pedidos",
+      icon: <ClipboardList className="size-4" />,
+    },
     { to: `/tienda/${storeId}/catalogo`, label: "Catálogo", icon: <Package className="size-4" /> },
-    { to: `/tienda/${storeId}/promociones`, label: "Promociones", icon: <Percent className="size-4" /> },
+    {
+      to: `/tienda/${storeId}/promociones`,
+      label: "Promociones",
+      icon: <Percent className="size-4" />,
+    },
     ...(role && canViewStock(role)
       ? [{ to: `/tienda/${storeId}/stock`, label: "Stock", icon: <Boxes className="size-4" /> }]
       : []),
     { to: `/tienda/${storeId}/clientes`, label: "Clientes", icon: <Users className="size-4" /> },
     ...(role && canViewReports(role)
-      ? [{ to: `/tienda/${storeId}/reportes`, label: "Reportes", icon: <BarChart3 className="size-4" /> }]
+      ? [
+          {
+            to: `/tienda/${storeId}/reportes`,
+            label: "Reportes",
+            icon: <BarChart3 className="size-4" />,
+          },
+        ]
       : []),
   ];
 

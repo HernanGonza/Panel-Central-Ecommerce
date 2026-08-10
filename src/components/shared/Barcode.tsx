@@ -14,9 +14,17 @@ export function Barcode({ value, className }: { value: string; className?: strin
       fontSize: 12,
       margin: 6,
       background: "transparent",
-      lineColor: "oklch(0.24 0.02 60)",
+      // Negro puro (no la marca) — mejor lectura del escáner y más seguro al imprimir.
+      lineColor: "#000000",
     });
   }, [value]);
 
-  return <svg ref={svgRef} className={cn("w-full", className)} role="img" aria-label={`Código de barras ${value}`} />;
+  return (
+    <svg
+      ref={svgRef}
+      className={cn("w-full", className)}
+      role="img"
+      aria-label={`Código de barras ${value}`}
+    />
+  );
 }

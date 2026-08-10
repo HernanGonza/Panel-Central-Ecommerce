@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Power, PowerOff } from "lucide-react";
+import { Power, PowerOff, Tag } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
@@ -8,11 +8,20 @@ import { usePromotions, useUpdatePromotion } from "@/features/promotions/hooks";
 import { PromotionDialog } from "@/features/promotions/PromotionDialog";
 import { useAuth } from "@/auth/useAuth";
 import { canManagePromotions } from "@/auth/permissions";
-import { PROMOTION_STATUS_LABEL, formatDiscount, promotionStatus } from "@/data/types";
+import {
+  PROMOTION_STATUS_LABEL,
+  formatDiscount,
+  promotionScopeLabel,
+  promotionStatus,
+} from "@/data/types";
 import { PROMOTION_STATUS_TONE } from "@/lib/status-tones";
 
-function formatDateRange(startDate: string | undefined, endDate: string | undefined): string | null {
-  const fmt = (iso: string) => new Date(iso).toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
+function formatDateRange(
+  startDate: string | undefined,
+  endDate: string | undefined,
+): string | null {
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
   if (startDate && endDate) return `${fmt(startDate)} – ${fmt(endDate)}`;
   if (startDate) return `Desde ${fmt(startDate)}`;
   if (endDate) return `Hasta ${fmt(endDate)}`;
@@ -45,9 +54,18 @@ export function PromotionsPage() {
               key={promotion.id}
               title={promotion.title}
               subtitle={dateRange ?? "Sin fecha límite"}
-              action={<StatusPill label={PROMOTION_STATUS_LABEL[status]} tone={PROMOTION_STATUS_TONE[status]} />}
+              action={
+                <StatusPill
+                  label={PROMOTION_STATUS_LABEL[status]}
+                  tone={PROMOTION_STATUS_TONE[status]}
+                />
+              }
             >
               <p className="text-sm text-muted-foreground">{promotion.description}</p>
+              <span className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Tag className="size-3" />
+                {promotionScopeLabel(promotion)}
+              </span>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-display text-lg font-semibold text-foreground">
                   {formatDiscount(promotion)}
@@ -59,7 +77,10 @@ export function PromotionsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        updatePromotion.mutate({ id: promotion.id, patch: { active: !promotion.active } })
+                        updatePromotion.mutate({
+                          id: promotion.id,
+                          patch: { active: !promotion.active },
+                        })
                       }
                     >
                       {promotion.active ? (
@@ -82,7 +103,9 @@ export function PromotionsPage() {
           );
         })}
         {promotions.length === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay promociones cargadas para esta tienda.</p>
+          <p className="text-sm text-muted-foreground">
+            Todavía no hay promociones cargadas para esta tienda.
+          </p>
         )}
       </div>
     </>

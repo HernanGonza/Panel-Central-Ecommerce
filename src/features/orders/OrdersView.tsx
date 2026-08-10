@@ -1,8 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -17,6 +18,7 @@ import { OrderDetailDialog } from "@/features/orders/OrderDetailDialog";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type Order, type OrderStatus } from "@/data/types";
 import { ORDER_STATUS_TONE } from "@/lib/status-tones";
 import { formatCurrency, formatRelativeDate } from "@/lib/format";
+import { downloadCsv } from "@/lib/csv";
 import { cn } from "@/lib/utils";
 
 type SortKey = "id" | "customerName" | "createdAt" | "total";
@@ -89,6 +91,28 @@ export function OrdersView({
     });
   }, [orders, sort]);
 
+  function handleExport() {
+    downloadCsv(
+      "pedidos",
+      [
+        { label: "Pedido", key: "id" },
+        { label: "Tienda", key: "tienda" },
+        { label: "Cliente", key: "cliente" },
+        { label: "Estado", key: "estado" },
+        { label: "Fecha", key: "fecha" },
+        { label: "Total", key: "total" },
+      ],
+      sortedOrders.map((order) => ({
+        id: order.id,
+        tienda: storeName(order.storeId),
+        cliente: order.customerName,
+        estado: ORDER_STATUS_LABEL[order.status],
+        fecha: new Date(order.createdAt).toLocaleString("es-AR"),
+        total: order.total,
+      })),
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -134,6 +158,12 @@ export function OrdersView({
       <SectionCard
         title="Pedidos recientes"
         subtitle="Tocá un pedido para ver el detalle del cliente"
+        action={
+          <Button type="button" variant="outline" size="sm" onClick={handleExport}>
+            <Download className="size-3.5" />
+            Exportar CSV
+          </Button>
+        }
       >
         <div className="overflow-x-auto">
           <Table>

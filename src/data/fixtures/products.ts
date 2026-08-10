@@ -112,4 +112,11 @@ export const products: Product[] = [
 ];
 
 /** Semilla del catálogo de categorías — el repositorio permite agregar más desde la UI. */
-export const INITIAL_PRODUCT_CATEGORIES = ["Remeras", "Pantalones", "Abrigo", "Calzado", "Vestidos", "Accesorios"];
+export const INITIAL_PRODUCT_CATEGORIES = [
+  "Remeras",
+  "Pantalones",
+  "Abrigo",
+  "Calzado",
+  "Vestidos",
+  "Accesorios",
+];

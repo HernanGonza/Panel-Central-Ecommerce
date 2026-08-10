@@ -1,7 +1,12 @@
+import { useState } from "react";
+import { Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { Barcode } from "@/components/shared/Barcode";
+import { PrintLabelsSheet } from "@/components/shared/PrintLabelsSheet";
 import { useStores } from "@/features/stores/hooks";
 import { LOW_STOCK_THRESHOLD, type Product } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -15,6 +20,7 @@ export function ProductDetailDialog({
 }) {
   const { data: stores = [] } = useStores();
   const storeName = stores.find((s) => s.id === product?.storeId)?.name;
+  const [labelQty, setLabelQty] = useState(1);
 
   return (
     <Dialog open={product !== null} onOpenChange={onOpenChange}>
@@ -26,7 +32,11 @@ export function ProductDetailDialog({
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <ProductThumbnail name={product.name} imageUrl={product.imageUrl} className="size-20 text-base" />
+                <ProductThumbnail
+                  name={product.name}
+                  imageUrl={product.imageUrl}
+                  className="size-20 text-base"
+                />
                 <div>
                   <p className="text-xs text-muted-foreground">{storeName ?? product.storeId}</p>
                   <p className="mt-0.5 font-display text-lg font-semibold text-foreground">
@@ -59,16 +69,39 @@ export function ProductDetailDialog({
                 </div>
               </dl>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">Código de barras</p>
                 <div className="rounded-lg border border-border bg-card p-2">
                   <Barcode value={product.barcode} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={labelQty}
+                    onChange={(e) => setLabelQty(Math.max(1, e.target.valueAsNumber || 1))}
+                    className="w-20"
+                  />
+                  <span className="text-xs text-muted-foreground">etiquetas</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => window.print()}
+                  >
+                    <Printer className="size-3.5" />
+                    Imprimir
+                  </Button>
                 </div>
               </div>
             </div>
           </>
         )}
       </DialogContent>
+
+      <PrintLabelsSheet product={product} quantity={labelQty} />
     </Dialog>
   );
 }

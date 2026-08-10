@@ -163,3 +163,29 @@
     font-family: var(--font-sans);
   }
 }
+
+/*
+ * Impresión de etiquetas: #print-root vive fuera de #root (ver index.html) y
+ * se llena por portal solo cuando se va a imprimir. En pantalla no se ve; al
+ * imprimir, se oculta todo lo demás y solo queda esto.
+ */
+#print-root {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #print-root,
+  #print-root * {
+    visibility: visible;
+  }
+
+  #print-root {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+}

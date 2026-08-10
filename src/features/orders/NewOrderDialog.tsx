@@ -14,12 +14,23 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useProducts } from "@/features/products/hooks";
 import { useCreateCustomer, useCustomers } from "@/features/customers/hooks";
 import { useCreateOrder } from "@/features/orders/hooks";
 import { useAuth } from "@/auth/useAuth";
-import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type OrderItem, type OrderStatus } from "@/data/types";
+import {
+  ORDER_STATUS_LABEL,
+  ORDER_STATUS_ORDER,
+  type OrderItem,
+  type OrderStatus,
+} from "@/data/types";
 import { formatCurrency } from "@/lib/format";
 
 const NEW_CUSTOMER = "__new__";
@@ -207,7 +218,9 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                       step={1}
                       className="w-20"
                       value={line?.quantity ?? 1}
-                      onChange={(e) => form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)}
+                      onChange={(e) =>
+                        form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)
+                      }
                     />
                     <span className="w-24 shrink-0 text-right text-sm text-muted-foreground">
                       {product ? formatCurrency(product.price * (line?.quantity ?? 0)) : "—"}
@@ -226,15 +239,33 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                 );
               })}
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1 })}>
-              <Plus className="size-3.5" />
-              Agregar producto
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ productId: "", quantity: 1 })}
+              >
+                <Plus className="size-3.5" />
+                Agregar producto
+              </Button>
+              <BarcodeScannerDialog
+                onDetected={handleScan}
+                trigger={
+                  <Button type="button" variant="outline" size="sm">
+                    Escanear código
+                  </Button>
+                }
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
             <Label>Estado inicial</Label>
-            <Select value={form.watch("status")} onValueChange={(v) => form.setValue("status", v as OrderStatus)}>
+            <Select
+              value={form.watch("status")}
+              onValueChange={(v) => form.setValue("status", v as OrderStatus)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -250,7 +281,9 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
 
           <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-3">
             <span className="text-sm font-medium text-foreground">Total</span>
-            <span className="font-display text-lg font-semibold text-foreground">{formatCurrency(total)}</span>
+            <span className="font-display text-lg font-semibold text-foreground">
+              {formatCurrency(total)}
+            </span>
           </div>
 
           <DialogFooter>

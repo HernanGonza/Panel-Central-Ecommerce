@@ -13,12 +13,30 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
 import { Barcode } from "@/components/shared/Barcode";
-import { useCategories, useCreateCategory, useCreateProduct, useUpdateProduct } from "@/features/products/hooks";
+import {
+  useCategories,
+  useCreateCategory,
+  useCreateProduct,
+  useUpdateProduct,
+} from "@/features/products/hooks";
 import { useCreateSupplier, useSuppliers } from "@/features/suppliers/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { generateBarcode } from "@/lib/barcode";
@@ -67,7 +85,13 @@ function NumberField({
   );
 }
 
-export function ProductDialog({ product, storeId }: { product?: Product; storeId?: string | undefined }) {
+export function ProductDialog({
+  product,
+  storeId,
+}: {
+  product?: Product;
+  storeId?: string | undefined;
+}) {
   const [open, setOpen] = useState(false);
   const [barcode, setBarcode] = useState(() => product?.barcode ?? generateBarcode());
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -200,7 +224,11 @@ export function ProductDialog({ product, storeId }: { product?: Product; storeId
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex items-center gap-3">
-              <ProductThumbnail name={nameForPreview} imageUrl={imageUrl || undefined} className="size-14" />
+              <ProductThumbnail
+                name={nameForPreview}
+                imageUrl={imageUrl || undefined}
+                className="size-14"
+              />
               <div>
                 <input
                   ref={fileInputRef}
@@ -209,7 +237,12 @@ export function ProductDialog({ product, storeId }: { product?: Product; storeId
                   className="hidden"
                   onChange={handleImagePick}
                 />
-                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <ImagePlus className="size-3.5" />
                   {imageUrl ? "Cambiar imagen" : "Subir imagen"}
                 </Button>
@@ -414,7 +447,12 @@ export function ProductDialog({ product, storeId }: { product?: Product; storeId
             <DialogFooter>
               <Button
                 type="submit"
-                disabled={createProduct.isPending || updateProduct.isPending || createCategory.isPending || createSupplier.isPending}
+                disabled={
+                  createProduct.isPending ||
+                  updateProduct.isPending ||
+                  createCategory.isPending ||
+                  createSupplier.isPending
+                }
               >
                 {isEdit ? "Guardar cambios" : "Crear producto"}
               </Button>

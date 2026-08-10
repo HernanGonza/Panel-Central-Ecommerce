@@ -13,7 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateShippingProvider } from "@/features/shipping/hooks";
 
@@ -30,7 +37,13 @@ export function ShippingProviderDialog() {
   const createProvider = useCreateShippingProvider();
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", contactName: "", contactPhone: "", contactEmail: "", coverageArea: "" },
+    defaultValues: {
+      name: "",
+      contactName: "",
+      contactPhone: "",
+      contactEmail: "",
+      coverageArea: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
