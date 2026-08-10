@@ -1,9 +1,10 @@
 /**
- * Series agregadas para gráficos históricos (tendencia de ventas, stock por
- * categoría, etc.). No se derivan de las entidades base porque representarían
- * meses de histórico transaccional que no tiene sentido modelar a mano en un
- * fixture — cuando conectemos Supabase, esto pasa a ser una vista/consulta
- * agregada real.
+ * Series agregadas para gráficos históricos (tendencia de ventas, ranking de
+ * productos más vendidos, etc.). No se derivan de las entidades base porque
+ * representarían meses de histórico transaccional que no tiene sentido
+ * modelar a mano en un fixture — cuando conectemos Supabase, esto pasa a ser
+ * una vista/consulta agregada real. El desglose de stock por categoría, en
+ * cambio, sí se deriva en vivo de `Product` (ver features/stock).
  */
 
 export const salesTrend = [
@@ -19,15 +20,6 @@ export const salesTrend = [
   { month: "Oct", currentYear: 39, previousYear: 31 },
   { month: "Nov", currentYear: 38, previousYear: 32 },
   { month: "Dic", currentYear: 42, previousYear: 34 },
-];
-
-export const stockByCategory = [
-  { category: "Remeras", units: 210 },
-  { category: "Pantalones", units: 180 },
-  { category: "Abrigo", units: 260 },
-  { category: "Calzado", units: 140 },
-  { category: "Vestidos", units: 95 },
-  { category: "Accesorios", units: 60 },
 ];
 
 export const salesByCategory = [

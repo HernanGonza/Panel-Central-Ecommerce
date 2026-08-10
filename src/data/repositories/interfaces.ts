@@ -7,12 +7,13 @@ import type {
   Product,
   Store,
 } from "@/data/types";
-import type { salesByCategory, salesTrend, stockByCategory, topSellingProducts } from "@/data/fixtures/analytics";
+import type { salesByCategory, salesTrend, topSellingProducts } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
 export interface StoreRepository {
   list(): Promise<Store[]>;
   getById(id: string): Promise<Store | undefined>;
+  create(input: Omit<Store, "id" | "monthlySales" | "stockUnits" | "ordersCount">): Promise<Store>;
 }
 
 export interface ProductRepository {
@@ -46,7 +47,6 @@ export interface UserRepository {
 
 export interface AnalyticsRepository {
   salesTrend(): Promise<typeof salesTrend>;
-  stockByCategory(): Promise<typeof stockByCategory>;
   salesByCategory(): Promise<typeof salesByCategory>;
   topSellingProducts(): Promise<typeof topSellingProducts>;
 }
