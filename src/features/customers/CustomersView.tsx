@@ -19,37 +19,45 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
       />
 
       <SectionCard title="Clientes" subtitle={storeId ? undefined : "Base consolidada"}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Tiendas</TableHead>
-              <TableHead>Compras</TableHead>
-              <TableHead>Gasto total</TableHead>
-              <TableHead className="text-right">Última compra</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell className="font-medium text-foreground">{customer.name}</TableCell>
-                <TableCell className="text-muted-foreground">{storeNames(customer.storeIds)}</TableCell>
-                <TableCell className="text-muted-foreground">{formatNumber(customer.purchasesCount)}</TableCell>
-                <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">
-                  {formatRelativeDate(customer.lastPurchaseAt)}
-                </TableCell>
-              </TableRow>
-            ))}
-            {customers.length === 0 && (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                  Todavía no hay clientes.
-                </TableCell>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead>DNI/CUIT</TableHead>
+                <TableHead>Tiendas</TableHead>
+                <TableHead>Compras</TableHead>
+                <TableHead>Gasto total</TableHead>
+                <TableHead className="text-right">Última compra</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {customers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell className="font-medium text-foreground">{customer.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{customer.email}</TableCell>
+                  <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
+                  <TableCell className="text-muted-foreground">{customer.docId}</TableCell>
+                  <TableCell className="text-muted-foreground">{storeNames(customer.storeIds)}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatNumber(customer.purchasesCount)}</TableCell>
+                  <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {formatRelativeDate(customer.lastPurchaseAt)}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {customers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
+                    Todavía no hay clientes.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </SectionCard>
     </>
   );

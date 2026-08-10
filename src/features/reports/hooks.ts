@@ -7,10 +7,3 @@ export function useSalesByCategory() {
     queryFn: () => repositories.analytics.salesByCategory(),
   });
 }
-
-export function useTopSellingProducts() {
-  return useQuery({
-    queryKey: ["analytics", "top-selling-products"],
-    queryFn: () => repositories.analytics.topSellingProducts(),
-  });
-}

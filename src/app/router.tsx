@@ -2,6 +2,8 @@ import { Navigate, createBrowserRouter, createRoutesFromElements, Route } from "
 import { RequireAuth } from "@/auth/RequireAuth";
 import { RequireOwnerRole } from "@/auth/RequireOwnerRole";
 import { RequireStoreAccess } from "@/auth/RequireStoreAccess";
+import { RequireStorePermission } from "@/auth/RequireStorePermission";
+import { canViewReports, canViewStock } from "@/auth/permissions";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { RootRedirect } from "@/features/auth/RootRedirect";
 import { AdminLayout } from "@/layouts/AdminLayout";
@@ -50,9 +52,13 @@ export const router = createBrowserRouter(
             <Route index element={<Navigate to="pedidos" replace />} />
             <Route path="pedidos" element={<StoreOrdersPage />} />
             <Route path="catalogo" element={<CatalogPage />} />
-            <Route path="stock" element={<StoreStockPage />} />
             <Route path="clientes" element={<StoreCustomersPage />} />
-            <Route path="reportes" element={<StoreReportsPage />} />
+            <Route element={<RequireStorePermission check={canViewStock} />}>
+              <Route path="stock" element={<StoreStockPage />} />
+            </Route>
+            <Route element={<RequireStorePermission check={canViewReports} />}>
+              <Route path="reportes" element={<StoreReportsPage />} />
+            </Route>
           </Route>
         </Route>
       </Route>

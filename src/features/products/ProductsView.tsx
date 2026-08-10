@@ -8,18 +8,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useProducts } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { ProductDialog } from "@/features/products/ProductDialog";
+import { useAuth } from "@/auth/useAuth";
+import { canManageCatalog } from "@/auth/permissions";
 import { PRODUCT_CATEGORIES } from "@/data/fixtures/products";
 import { LOW_STOCK_THRESHOLD } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 const ALL = "__all__";
-const COLUMN_COUNT_SCOPED = 6;
-const COLUMN_COUNT_ALL = 7;
 
 export function ProductsView({ storeId }: { storeId?: string | undefined }) {
   const [category, setCategory] = useState<string>(ALL);
   const [storeFilter, setStoreFilter] = useState<string>(ALL);
   const { data: stores = [] } = useStores();
+  const { session } = useAuth();
+  const canEdit = session ? canManageCatalog(session.user.role) : false;
+  const columnCount = (storeId ? 6 : 7) + (canEdit ? 1 : 0);
 
   const effectiveStoreId = storeId ?? (storeFilter === ALL ? undefined : storeFilter);
   const { data: products = [], isLoading } = useProducts({
@@ -34,7 +37,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
       <PageHeader
         title={storeId ? "Catálogo" : "Productos"}
         subtitle={storeId ? "Productos de esta tienda" : "Catálogo consolidado de todas las tiendas"}
-        action={<ProductDialog storeId={storeId} />}
+        action={canEdit ? <ProductDialog storeId={storeId} /> : undefined}
       />
 
       <SectionCard
@@ -84,7 +87,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
                 <TableHead>Costo</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead className="text-right">Stock</TableHead>
-                <TableHead className="w-10" />
+                {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,17 +110,16 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
                       tone={product.stock < LOW_STOCK_THRESHOLD ? "gold" : "success"}
                     />
                   </TableCell>
-                  <TableCell>
-                    <ProductDialog product={product} />
-                  </TableCell>
+                  {canEdit && (
+                    <TableCell>
+                      <ProductDialog product={product} />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {!isLoading && products.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={storeId ? COLUMN_COUNT_SCOPED : COLUMN_COUNT_ALL}
-                    className="py-10 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={columnCount} className="py-10 text-center text-sm text-muted-foreground">
                     No hay productos que coincidan con el filtro.
                   </TableCell>
                 </TableRow>

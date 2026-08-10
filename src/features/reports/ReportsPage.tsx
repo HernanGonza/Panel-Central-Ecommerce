@@ -1,20 +1,62 @@
+import { useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
-import { useSalesByCategory, useTopSellingProducts } from "@/features/reports/hooks";
+import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSalesByCategory } from "@/features/reports/hooks";
 import { useStores } from "@/features/stores/hooks";
-import { formatCurrencyCompact, formatNumber } from "@/lib/format";
+import { useProducts } from "@/features/products/hooks";
+import { useCustomers } from "@/features/customers/hooks";
+import { useOrders } from "@/features/orders/hooks";
+import { useUsers } from "@/features/users/hooks";
+import { formatCurrency, formatCurrencyCompact, formatNumber } from "@/lib/format";
 import { TONE_COLOR } from "@/lib/tones";
 
 const CATEGORY_COLOR = [TONE_COLOR.clay, TONE_COLOR.teal, TONE_COLOR.gold, TONE_COLOR.success];
+const ALL = "__all__";
+const TOP_PRODUCTS_LIMIT = 5;
+const TOP_CUSTOMERS_LIMIT = 5;
 
 export function ReportsPage() {
   const { data: categories = [] } = useSalesByCategory();
-  const { data: topProducts = [] } = useTopSellingProducts();
   const { data: stores = [] } = useStores();
+  const { data: customers = [] } = useCustomers();
+  const { data: orders = [] } = useOrders();
+  const { data: users = [] } = useUsers();
+
+  const [productStoreFilter, setProductStoreFilter] = useState(ALL);
+  const { data: products = [] } = useProducts({
+    storeId: productStoreFilter === ALL ? undefined : productStoreFilter,
+  });
 
   const maxSales = Math.max(1, ...stores.map((s) => s.monthlySales));
   const leader = categories[0];
+
+  const topProducts = useMemo(
+    () => [...products].sort((a, b) => b.unitsSold - a.unitsSold).slice(0, TOP_PRODUCTS_LIMIT),
+    [products],
+  );
+
+  const topCustomers = useMemo(
+    () => [...customers].sort((a, b) => b.totalSpent - a.totalSpent).slice(0, TOP_CUSTOMERS_LIMIT),
+    [customers],
+  );
+
+  const sellerRanking = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const order of orders) {
+      if (!order.sellerId) continue;
+      totals.set(order.sellerId, (totals.get(order.sellerId) ?? 0) + order.total);
+    }
+    return [...totals.entries()]
+      .map(([sellerId, total]) => {
+        const seller = users.find((u) => u.id === sellerId);
+        const storeName = stores.find((s) => s.id === seller?.storeIds[0])?.name;
+        return { sellerId, name: seller?.name ?? sellerId, storeName, total };
+      })
+      .sort((a, b) => b.total - a.total);
+  }, [orders, users, stores]);
 
   return (
     <>
@@ -38,11 +80,11 @@ export function ReportsPage() {
                     strokeWidth={2}
                   >
                     {categories.map((entry, i) => (
-                      <Cell key={entry.category} fill={CATEGORY_COLOR[i % CATEGORY_COLOR.length]} />
+                      <Cell key={entry.category} fill={CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay} />
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number, name: string) => [`${value} %`, name]}
+                    formatter={(value, name) => [`${value} %`, name]}
                     contentStyle={{
                       backgroundColor: "var(--color-card)",
                       border: "1px solid var(--color-border)",
@@ -65,7 +107,7 @@ export function ReportsPage() {
                   <span className="flex items-center gap-2 text-foreground">
                     <span
                       className="size-2.5 rounded-sm"
-                      style={{ backgroundColor: CATEGORY_COLOR[i % CATEGORY_COLOR.length] }}
+                      style={{ backgroundColor: CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay }}
                     />
                     {c.category}
                   </span>
@@ -99,17 +141,80 @@ export function ReportsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Productos más vendidos" subtitle="Unidades del mes" className="lg:col-span-2">
-          <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <SectionCard
+          title="Productos más vendidos"
+          subtitle="Unidades históricas"
+          action={
+            <Select value={productStoreFilter} onValueChange={setProductStoreFilter}>
+              <SelectTrigger size="sm" className="w-40">
+                <SelectValue placeholder="Tienda" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Todas las tiendas</SelectItem>
+                {stores.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
+        >
+          <ol className="space-y-4">
             {topProducts.map((p, i) => (
-              <li key={p.product} className="flex items-center gap-3">
+              <li key={p.id} className="flex items-center gap-3">
                 <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{p.product}</p>
-                  <p className="text-xs text-muted-foreground">{formatNumber(p.units)} u.</p>
+                <ProductThumbnail name={p.name} imageUrl={p.imageUrl} className="size-8" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatNumber(p.unitsSold)} u.</p>
                 </div>
               </li>
             ))}
+            {topProducts.length === 0 && (
+              <p className="text-sm text-muted-foreground">Sin datos para esta tienda.</p>
+            )}
+          </ol>
+        </SectionCard>
+
+        <SectionCard title="Clientes que más compraron" subtitle="Por gasto total">
+          <ol className="space-y-4">
+            {topCustomers.map((c, i) => (
+              <li key={c.id} className="flex items-center gap-3">
+                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">{c.purchasesCount} compras</p>
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-foreground">
+                  {formatCurrency(c.totalSpent)}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
+
+        <SectionCard
+          title="Vendedores"
+          subtitle="Ranking por monto vendido"
+          className="lg:col-span-2"
+        >
+          <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {sellerRanking.map((seller, i) => (
+              <li key={seller.sellerId} className="flex items-center gap-3">
+                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{seller.name}</p>
+                  <p className="text-xs text-muted-foreground">{seller.storeName ?? "—"}</p>
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-foreground">
+                  {formatCurrency(seller.total)}
+                </span>
+              </li>
+            ))}
+            {sellerRanking.length === 0 && (
+              <p className="text-sm text-muted-foreground">Todavía no hay ventas cargadas por vendedores.</p>
+            )}
           </ol>
         </SectionCard>
       </div>

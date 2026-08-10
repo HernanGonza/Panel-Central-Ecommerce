@@ -85,7 +85,7 @@ export function DashboardPage() {
                   tickFormatter={(v: number) => `$${v}M`}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`$${value} M`, undefined]}
+                  formatter={(value, name) => [`$${value} M`, name === "currentYear" ? "Este año" : "Año anterior"]}
                   contentStyle={{
                     backgroundColor: "var(--color-card)",
                     border: "1px solid var(--color-border)",
