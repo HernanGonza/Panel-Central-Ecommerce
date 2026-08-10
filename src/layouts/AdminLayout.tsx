@@ -10,6 +10,7 @@ import {
   Receipt,
   BarChart3,
   UserCog,
+  Truck,
 } from "lucide-react";
 import { Sidebar, type SidebarNavItem } from "@/components/shared/Sidebar";
 
@@ -17,6 +18,7 @@ const ADMIN_NAV: SidebarNavItem[] = [
   { to: "/admin/general", label: "Panel general", icon: <LayoutDashboard className="size-4" /> },
   { to: "/admin/tiendas", label: "Tiendas", icon: <Store className="size-4" /> },
   { to: "/admin/productos", label: "Productos", icon: <Package className="size-4" /> },
+  { to: "/admin/proveedores", label: "Proveedores", icon: <Truck className="size-4" /> },
   { to: "/admin/stock", label: "Stock", icon: <Boxes className="size-4" /> },
   { to: "/admin/pedidos", label: "Pedidos", icon: <ClipboardList className="size-4" /> },
   { to: "/admin/clientes", label: "Clientes", icon: <Users className="size-4" /> },

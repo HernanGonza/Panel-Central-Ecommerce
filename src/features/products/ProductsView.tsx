@@ -18,12 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProducts } from "@/features/products/hooks";
+import { useCategories, useProducts } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { ProductDialog } from "@/features/products/ProductDialog";
 import { useAuth } from "@/auth/useAuth";
 import { canManageCatalog } from "@/auth/permissions";
-import { PRODUCT_CATEGORIES } from "@/data/fixtures/products";
 import { LOW_STOCK_THRESHOLD } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
@@ -33,6 +32,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
   const [category, setCategory] = useState<string>(ALL);
   const [storeFilter, setStoreFilter] = useState<string>(ALL);
   const { data: stores = [] } = useStores();
+  const { data: categories = [] } = useCategories();
   const { session } = useAuth();
   const canEdit = session ? canManageCatalog(session.user.role) : false;
   const columnCount = (storeId ? 6 : 7) + (canEdit ? 1 : 0);
@@ -81,7 +81,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL}>Todas las categorías</SelectItem>
-                {PRODUCT_CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
                   </SelectItem>
