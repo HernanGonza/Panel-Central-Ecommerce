@@ -13,7 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateStore } from "@/features/stores/hooks";
 
@@ -31,7 +38,11 @@ export function NewStoreDialog() {
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
-    await createStore.mutateAsync({ name: values.name, zone: values.zone, status: "en_incorporacion" });
+    await createStore.mutateAsync({
+      name: values.name,
+      zone: values.zone,
+      status: "en_incorporacion",
+    });
     toast.success(`${values.name} se agregó a la red`);
     form.reset();
     setOpen(false);

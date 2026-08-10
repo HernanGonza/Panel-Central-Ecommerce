@@ -3,8 +3,21 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useProducts } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { ProductDialog } from "@/features/products/ProductDialog";
@@ -36,7 +49,9 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
     <>
       <PageHeader
         title={storeId ? "Catálogo" : "Productos"}
-        subtitle={storeId ? "Productos de esta tienda" : "Catálogo consolidado de todas las tiendas"}
+        subtitle={
+          storeId ? "Productos de esta tienda" : "Catálogo consolidado de todas las tiendas"
+        }
         action={canEdit ? <ProductDialog storeId={storeId} /> : undefined}
       />
 
@@ -100,9 +115,15 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{product.category}</TableCell>
-                  {!storeId && <TableCell className="text-muted-foreground">{storeName(product.storeId)}</TableCell>}
+                  {!storeId && (
+                    <TableCell className="text-muted-foreground">
+                      {storeName(product.storeId)}
+                    </TableCell>
+                  )}
                   <TableCell className="text-muted-foreground">{product.supplier}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatCurrency(product.cost)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatCurrency(product.cost)}
+                  </TableCell>
                   <TableCell>{formatCurrency(product.price)}</TableCell>
                   <TableCell className="text-right">
                     <StatusPill
@@ -119,7 +140,10 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
               ))}
               {!isLoading && products.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={columnCount} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={columnCount}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     No hay productos que coincidan con el filtro.
                   </TableCell>
                 </TableRow>

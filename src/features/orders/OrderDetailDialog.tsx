@@ -27,7 +27,10 @@ export function OrderDetailDialog({
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <StatusPill label={ORDER_STATUS_LABEL[order.status]} tone={ORDER_STATUS_TONE[order.status]} />
+                <StatusPill
+                  label={ORDER_STATUS_LABEL[order.status]}
+                  tone={ORDER_STATUS_TONE[order.status]}
+                />
                 <span className="font-display text-lg font-semibold text-foreground">
                   {formatCurrency(order.total)}
                 </span>
@@ -46,7 +49,9 @@ export function OrderDetailDialog({
 
               <div className="rounded-xl border border-border bg-secondary/40 p-4">
                 <p className="text-xs font-medium text-muted-foreground">Cliente</p>
-                <p className="mt-1 font-display text-base font-semibold text-foreground">{order.customerName}</p>
+                <p className="mt-1 font-display text-base font-semibold text-foreground">
+                  {order.customerName}
+                </p>
                 {customer ? (
                   <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                     <p>{customer.email}</p>
@@ -58,7 +63,9 @@ export function OrderDetailDialog({
                     </p>
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-muted-foreground">Cliente ocasional, sin ficha registrada.</p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Cliente ocasional, sin ficha registrada.
+                  </p>
                 )}
               </div>
             </div>

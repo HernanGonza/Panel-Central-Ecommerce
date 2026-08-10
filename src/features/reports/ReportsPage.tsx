@@ -3,7 +3,13 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSalesByCategory } from "@/features/reports/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { useProducts } from "@/features/products/hooks";
@@ -80,7 +86,10 @@ export function ReportsPage() {
                     strokeWidth={2}
                   >
                     {categories.map((entry, i) => (
-                      <Cell key={entry.category} fill={CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay} />
+                      <Cell
+                        key={entry.category}
+                        fill={CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -96,7 +105,9 @@ export function ReportsPage() {
               </ResponsiveContainer>
               {leader && (
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-display text-xl font-semibold text-foreground">{leader.pct} %</span>
+                  <span className="font-display text-xl font-semibold text-foreground">
+                    {leader.pct} %
+                  </span>
                   <span className="text-[11px] text-muted-foreground">{leader.category}</span>
                 </div>
               )}
@@ -107,7 +118,10 @@ export function ReportsPage() {
                   <span className="flex items-center gap-2 text-foreground">
                     <span
                       className="size-2.5 rounded-sm"
-                      style={{ backgroundColor: CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay }}
+                      style={{
+                        backgroundColor:
+                          CATEGORY_COLOR[i % CATEGORY_COLOR.length] ?? TONE_COLOR.clay,
+                      }}
                     />
                     {c.category}
                   </span>
@@ -124,7 +138,9 @@ export function ReportsPage() {
               <div key={store.id}>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{store.name}</span>
-                  <span className="font-semibold text-foreground">{formatCurrencyCompact(store.monthlySales)}</span>
+                  <span className="font-semibold text-foreground">
+                    {formatCurrencyCompact(store.monthlySales)}
+                  </span>
                 </div>
                 <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-secondary">
                   <div
@@ -163,7 +179,9 @@ export function ReportsPage() {
           <ol className="space-y-4">
             {topProducts.map((p, i) => (
               <li key={p.id} className="flex items-center gap-3">
-                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-display text-sm text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <ProductThumbnail name={p.name} imageUrl={p.imageUrl} className="size-8" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
@@ -181,7 +199,9 @@ export function ReportsPage() {
           <ol className="space-y-4">
             {topCustomers.map((c, i) => (
               <li key={c.id} className="flex items-center gap-3">
-                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-display text-sm text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{c.name}</p>
                   <p className="text-xs text-muted-foreground">{c.purchasesCount} compras</p>
@@ -202,7 +222,9 @@ export function ReportsPage() {
           <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {sellerRanking.map((seller, i) => (
               <li key={seller.sellerId} className="flex items-center gap-3">
-                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-display text-sm text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{seller.name}</p>
                   <p className="text-xs text-muted-foreground">{seller.storeName ?? "—"}</p>
@@ -213,7 +235,9 @@ export function ReportsPage() {
               </li>
             ))}
             {sellerRanking.length === 0 && (
-              <p className="text-sm text-muted-foreground">Todavía no hay ventas cargadas por vendedores.</p>
+              <p className="text-sm text-muted-foreground">
+                Todavía no hay ventas cargadas por vendedores.
+              </p>
             )}
           </ol>
         </SectionCard>

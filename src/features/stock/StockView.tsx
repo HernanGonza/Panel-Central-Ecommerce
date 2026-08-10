@@ -3,7 +3,14 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useProducts } from "@/features/products/hooks";
 import { useLowStock } from "@/features/stock/hooks";
 import { useStores } from "@/features/stores/hooks";
@@ -34,7 +41,9 @@ export function StockView({ storeId }: { storeId?: string | undefined }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <SectionCard
           title="Stock por categoría"
-          subtitle={storeId ? "Unidades de esta tienda" : "Unidades consolidadas de todas las tiendas"}
+          subtitle={
+            storeId ? "Unidades de esta tienda" : "Unidades consolidadas de todas las tiendas"
+          }
           className="lg:col-span-2"
         >
           <div className="h-72">
@@ -73,10 +82,15 @@ export function StockView({ storeId }: { storeId?: string | undefined }) {
               <li key={product.id} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{product.name}</p>
-                  {!storeId && <p className="text-xs text-muted-foreground">{storeName(product.storeId)}</p>}
+                  {!storeId && (
+                    <p className="text-xs text-muted-foreground">{storeName(product.storeId)}</p>
+                  )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold" style={toneStyle("gold")}>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                    style={toneStyle("gold")}
+                  >
                     {product.stock} u.
                   </span>
                   <ProductDialog product={product} />
@@ -92,7 +106,9 @@ export function StockView({ storeId }: { storeId?: string | undefined }) {
 
       <SectionCard
         title="Inventario"
-        subtitle={storeId ? "Todos los productos de esta tienda" : "Todos los productos, todas las tiendas"}
+        subtitle={
+          storeId ? "Todos los productos de esta tienda" : "Todos los productos, todas las tiendas"
+        }
       >
         <div className="overflow-x-auto">
           <Table>
@@ -113,7 +129,11 @@ export function StockView({ storeId }: { storeId?: string | undefined }) {
                       <span className="font-medium text-foreground">{product.name}</span>
                     </div>
                   </TableCell>
-                  {!storeId && <TableCell className="text-muted-foreground">{storeName(product.storeId)}</TableCell>}
+                  {!storeId && (
+                    <TableCell className="text-muted-foreground">
+                      {storeName(product.storeId)}
+                    </TableCell>
+                  )}
                   <TableCell className="text-right">
                     <StatusPill
                       label={`${formatNumber(product.stock)} u.`}

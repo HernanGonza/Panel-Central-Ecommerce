@@ -25,13 +25,24 @@ export function StoreReportsPage() {
       <PageHeader title="Reportes" subtitle="Desempeño de esta tienda" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Ventas del mes" value={formatCurrencyCompact(store?.monthlySales ?? 0)} tone="clay" />
-        <StatCard label="Pedidos del mes" value={formatNumber(store?.ordersCount ?? 0)} tone="teal" />
+        <StatCard
+          label="Ventas del mes"
+          value={formatCurrencyCompact(store?.monthlySales ?? 0)}
+          tone="clay"
+        />
+        <StatCard
+          label="Pedidos del mes"
+          value={formatNumber(store?.ordersCount ?? 0)}
+          tone="teal"
+        />
         <StatCard label="Stock" value={`${formatNumber(store?.stockUnits ?? 0)} u.`} tone="gold" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCard title="Pedidos por estado" subtitle="Sobre los pedidos registrados de esta tienda">
+        <SectionCard
+          title="Pedidos por estado"
+          subtitle="Sobre los pedidos registrados de esta tienda"
+        >
           <div className="space-y-4">
             {ORDER_STATUS_ORDER.map((status) => {
               const value = statusCounts?.[status] ?? 0;
@@ -45,7 +56,10 @@ export function StoreReportsPage() {
                   <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-secondary">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${pct}%`, backgroundColor: TONE_COLOR[ORDER_STATUS_TONE[status]] }}
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: TONE_COLOR[ORDER_STATUS_TONE[status]],
+                      }}
                     />
                   </div>
                 </div>
@@ -58,7 +72,9 @@ export function StoreReportsPage() {
           <ul className="space-y-4">
             {topCustomers.map((customer, i) => (
               <li key={customer.id} className="flex items-center gap-3">
-                <span className="font-display text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-display text-sm text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{customer.name}</p>
                   <p className="text-xs text-muted-foreground">{customer.purchasesCount} compras</p>
@@ -69,7 +85,9 @@ export function StoreReportsPage() {
               </li>
             ))}
             {topCustomers.length === 0 && (
-              <p className="text-sm text-muted-foreground">Todavía no hay clientes en esta tienda.</p>
+              <p className="text-sm text-muted-foreground">
+                Todavía no hay clientes en esta tienda.
+              </p>
             )}
           </ul>
         </SectionCard>

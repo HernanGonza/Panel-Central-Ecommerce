@@ -20,7 +20,10 @@ export const memoryOrderRepository: OrderRepository = {
   },
   async countByStatus(filter) {
     const scoped = filter?.storeId ? orders.filter((o) => o.storeId === filter.storeId) : orders;
-    const counts = Object.fromEntries(ORDER_STATUS_ORDER.map((s) => [s, 0])) as Record<OrderStatus, number>;
+    const counts = Object.fromEntries(ORDER_STATUS_ORDER.map((s) => [s, 0])) as Record<
+      OrderStatus,
+      number
+    >;
     for (const o of scoped) counts[o.status] += 1;
     return delay(counts);
   },

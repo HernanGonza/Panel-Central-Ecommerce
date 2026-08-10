@@ -3,7 +3,14 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useOrders, useOrderStatusCounts } from "@/features/orders/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { OrderDetailDialog } from "@/features/orders/OrderDetailDialog";
@@ -65,13 +72,18 @@ export function OrdersView({
   const totalOrders = statusCounts ? Object.values(statusCounts).reduce((a, b) => a + b, 0) : 0;
 
   function toggleSort(key: SortKey) {
-    setSort((current) => (current.key === key ? { key, dir: current.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+    setSort((current) =>
+      current.key === key
+        ? { key, dir: current.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: "asc" },
+    );
   }
 
   const sortedOrders = useMemo(() => {
     const factor = sort.dir === "asc" ? 1 : -1;
     return [...orders].sort((a, b) => {
-      if (sort.key === "createdAt") return factor * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      if (sort.key === "createdAt")
+        return factor * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       if (sort.key === "total") return factor * (a.total - b.total);
       return factor * a[sort.key].localeCompare(b[sort.key]);
     });
@@ -81,7 +93,11 @@ export function OrdersView({
     <>
       <PageHeader
         title="Pedidos"
-        subtitle={storeId ? "Pedidos de esta tienda, en tiempo real" : "Pedidos de todas las tiendas, en tiempo real"}
+        subtitle={
+          storeId
+            ? "Pedidos de esta tienda, en tiempo real"
+            : "Pedidos de todas las tiendas, en tiempo real"
+        }
         action={headerAction}
       />
 
@@ -115,17 +131,31 @@ export function OrdersView({
         ))}
       </div>
 
-      <SectionCard title="Pedidos recientes" subtitle="Tocá un pedido para ver el detalle del cliente">
+      <SectionCard
+        title="Pedidos recientes"
+        subtitle="Tocá un pedido para ver el detalle del cliente"
+      >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <SortableHead label="Pedido" sortKey="id" sort={sort} onSort={toggleSort} />
                 {!storeId && <TableHead>Tienda</TableHead>}
-                <SortableHead label="Cliente" sortKey="customerName" sort={sort} onSort={toggleSort} />
+                <SortableHead
+                  label="Cliente"
+                  sortKey="customerName"
+                  sort={sort}
+                  onSort={toggleSort}
+                />
                 <TableHead>Estado</TableHead>
                 <SortableHead label="Fecha" sortKey="createdAt" sort={sort} onSort={toggleSort} />
-                <SortableHead label="Total" sortKey="total" sort={sort} onSort={toggleSort} align="right" />
+                <SortableHead
+                  label="Total"
+                  sortKey="total"
+                  sort={sort}
+                  onSort={toggleSort}
+                  align="right"
+                />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -136,12 +166,21 @@ export function OrdersView({
                   className="cursor-pointer"
                 >
                   <TableCell className="font-medium text-foreground">{order.id}</TableCell>
-                  {!storeId && <TableCell className="text-muted-foreground">{storeName(order.storeId)}</TableCell>}
+                  {!storeId && (
+                    <TableCell className="text-muted-foreground">
+                      {storeName(order.storeId)}
+                    </TableCell>
+                  )}
                   <TableCell className="text-muted-foreground">{order.customerName}</TableCell>
                   <TableCell>
-                    <StatusPill label={ORDER_STATUS_LABEL[order.status]} tone={ORDER_STATUS_TONE[order.status]} />
+                    <StatusPill
+                      label={ORDER_STATUS_LABEL[order.status]}
+                      tone={ORDER_STATUS_TONE[order.status]}
+                    />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{formatRelativeDate(order.createdAt)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatRelativeDate(order.createdAt)}
+                  </TableCell>
                   <TableCell className="text-right font-medium text-foreground">
                     {formatCurrency(order.total)}
                   </TableCell>
@@ -149,7 +188,10 @@ export function OrdersView({
               ))}
               {sortedOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={storeId ? 5 : 6} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={storeId ? 5 : 6}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     No hay pedidos que coincidan con el filtro.
                   </TableCell>
                 </TableRow>
@@ -159,7 +201,10 @@ export function OrdersView({
         </div>
       </SectionCard>
 
-      <OrderDetailDialog order={selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)} />
+      <OrderDetailDialog
+        order={selectedOrder}
+        onOpenChange={(open) => !open && setSelectedOrder(null)}
+      />
     </>
   );
 }

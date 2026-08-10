@@ -46,7 +46,9 @@ export function LoginPage() {
     }
   }
 
-  const demoUsers = DEMO_USER_IDS.map((id) => users.find((u) => u.id === id)).filter((u) => u !== undefined);
+  const demoUsers = DEMO_USER_IDS.map((id) => users.find((u) => u.id === id)).filter(
+    (u) => u !== undefined,
+  );
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-background px-4">
@@ -61,7 +63,10 @@ export function LoginPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]"
+        >
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -110,7 +115,9 @@ export function LoginPage() {
                     {ROLE_LABEL[user.role]} · {storeNames(user.storeIds)}
                   </span>
                 </span>
-                {pendingDemoId === user.id && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+                {pendingDemoId === user.id && (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                )}
               </button>
             ))}
           </div>

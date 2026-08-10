@@ -7,7 +7,10 @@ export function useDashboardData() {
     queryKey: ["orders", "status-counts"],
     queryFn: () => repositories.orders.countByStatus(),
   });
-  const recentOrders = useQuery({ queryKey: ["orders", "all"], queryFn: () => repositories.orders.list() });
+  const recentOrders = useQuery({
+    queryKey: ["orders", "all"],
+    queryFn: () => repositories.orders.list(),
+  });
   const salesTrend = useQuery({
     queryKey: ["analytics", "sales-trend"],
     queryFn: () => repositories.analytics.salesTrend(),

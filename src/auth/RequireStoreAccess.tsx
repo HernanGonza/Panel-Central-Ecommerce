@@ -14,7 +14,8 @@ export function RequireStoreAccess() {
   if (!session) return <Navigate to="/login" replace />;
 
   const { user } = session;
-  const allowed = isOwnerRole(user.role) || (storeId !== undefined && user.storeIds.includes(storeId));
+  const allowed =
+    isOwnerRole(user.role) || (storeId !== undefined && user.storeIds.includes(storeId));
   if (!allowed) {
     return <Navigate to={homePathForUser(user)} replace />;
   }

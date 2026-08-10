@@ -13,9 +13,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCreateProduct, useUpdateProduct } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { PRODUCT_CATEGORIES, PRODUCT_SUPPLIERS } from "@/data/fixtures/products";
@@ -59,7 +72,13 @@ function NumberField({
   );
 }
 
-export function ProductDialog({ product, storeId }: { product?: Product; storeId?: string | undefined }) {
+export function ProductDialog({
+  product,
+  storeId,
+}: {
+  product?: Product;
+  storeId?: string | undefined;
+}) {
   const [open, setOpen] = useState(false);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -96,7 +115,15 @@ export function ProductDialog({ product, storeId }: { product?: Product; storeId
     } else {
       await createProduct.mutateAsync({ ...values, unitsSold: 0 });
       toast.success(`${values.name} se agregó al catálogo`);
-      form.reset({ name: "", category: "", storeId: storeId ?? "", supplier: "", price: 0, cost: 0, stock: 0 });
+      form.reset({
+        name: "",
+        category: "",
+        storeId: storeId ?? "",
+        supplier: "",
+        price: 0,
+        cost: 0,
+        stock: 0,
+      });
     }
     setOpen(false);
   }

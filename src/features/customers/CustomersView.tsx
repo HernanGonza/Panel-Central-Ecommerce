@@ -1,6 +1,13 @@
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useCustomers } from "@/features/customers/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { formatCurrency, formatNumber, formatRelativeDate } from "@/lib/format";
@@ -9,7 +16,8 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
   const { data: customers = [] } = useCustomers({ storeId });
   const { data: stores = [] } = useStores();
 
-  const storeNames = (ids: string[]) => ids.map((id) => stores.find((s) => s.id === id)?.name ?? id).join(", ");
+  const storeNames = (ids: string[]) =>
+    ids.map((id) => stores.find((s) => s.id === id)?.name ?? id).join(", ");
 
   return (
     <>
@@ -40,8 +48,12 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
                   <TableCell className="text-muted-foreground">{customer.email}</TableCell>
                   <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
                   <TableCell className="text-muted-foreground">{customer.docId}</TableCell>
-                  <TableCell className="text-muted-foreground">{storeNames(customer.storeIds)}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatNumber(customer.purchasesCount)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {storeNames(customer.storeIds)}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatNumber(customer.purchasesCount)}
+                  </TableCell>
                   <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">
                     {formatRelativeDate(customer.lastPurchaseAt)}
@@ -50,7 +62,10 @@ export function CustomersView({ storeId }: { storeId?: string | undefined }) {
               ))}
               {customers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={8}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     Todavía no hay clientes.
                   </TableCell>
                 </TableRow>

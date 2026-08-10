@@ -39,7 +39,10 @@ export function ProductThumbnail({
 
   return (
     <span
-      className={cn("flex size-10 shrink-0 items-center justify-center rounded-lg text-xs font-semibold", className)}
+      className={cn(
+        "flex size-10 shrink-0 items-center justify-center rounded-lg text-xs font-semibold",
+        className,
+      )}
       style={{ backgroundColor: withAlpha(color, 0.16), color }}
       aria-hidden
     >

@@ -4,7 +4,9 @@ import { delay } from "@/data/repositories/memory/delay";
 
 export const memoryInvoiceRepository: InvoiceRepository = {
   async list(filter) {
-    const result = filter?.storeId ? invoices.filter((i) => i.storeId === filter.storeId) : invoices;
+    const result = filter?.storeId
+      ? invoices.filter((i) => i.storeId === filter.storeId)
+      : invoices;
     return delay([...result]);
   },
   async paymentMethodStats() {

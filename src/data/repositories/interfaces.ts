@@ -1,12 +1,4 @@
-import type {
-  AppUser,
-  Customer,
-  Invoice,
-  Order,
-  OrderStatus,
-  Product,
-  Store,
-} from "@/data/types";
+import type { AppUser, Customer, Invoice, Order, OrderStatus, Product, Store } from "@/data/types";
 import type { salesByCategory, salesTrend } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 

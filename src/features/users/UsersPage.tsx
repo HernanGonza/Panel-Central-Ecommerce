@@ -1,7 +1,14 @@
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useUsers } from "@/features/users/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { ROLE_LABEL } from "@/data/types";
@@ -12,7 +19,9 @@ export function UsersPage() {
   const { data: stores = [] } = useStores();
 
   const storeNames = (ids: string[]) =>
-    ids.length === 0 ? "Todas las tiendas" : ids.map((id) => stores.find((s) => s.id === id)?.name ?? id).join(", ");
+    ids.length === 0
+      ? "Todas las tiendas"
+      : ids.map((id) => stores.find((s) => s.id === id)?.name ?? id).join(", ");
 
   return (
     <>

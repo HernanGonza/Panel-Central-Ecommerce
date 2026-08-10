@@ -16,7 +16,12 @@ export function StatCard({
 }) {
   const color = TONE_COLOR[tone];
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]", className)}>
+    <div
+      className={cn(
+        "rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]",
+        className,
+      )}
+    >
       <div className="flex items-start justify-between">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <span

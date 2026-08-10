@@ -14,7 +14,13 @@ export const memoryStoreRepository: StoreRepository = {
     return delay(stores.find((s) => s.id === id));
   },
   async create(input) {
-    const store: Store = { ...input, id: `store-${nextId++}`, monthlySales: 0, stockUnits: 0, ordersCount: 0 };
+    const store: Store = {
+      ...input,
+      id: `store-${nextId++}`,
+      monthlySales: 0,
+      stockUnits: 0,
+      ordersCount: 0,
+    };
     stores.push(store);
     return delay(store);
   },

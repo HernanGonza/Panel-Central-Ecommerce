@@ -26,7 +26,12 @@ export function StoresPage() {
             key={store.id}
             title={store.name}
             subtitle={store.zone}
-            action={<StatusPill label={STORE_STATUS_LABEL[store.status]} tone={STORE_STATUS_TONE[store.status]} />}
+            action={
+              <StatusPill
+                label={STORE_STATUS_LABEL[store.status]}
+                tone={STORE_STATUS_TONE[store.status]}
+              />
+            }
           >
             <div className="grid grid-cols-3 gap-3">
               <div>

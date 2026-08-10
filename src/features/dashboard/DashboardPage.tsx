@@ -85,7 +85,10 @@ export function DashboardPage() {
                   tickFormatter={(v: number) => `$${v}M`}
                 />
                 <Tooltip
-                  formatter={(value, name) => [`$${value} M`, name === "currentYear" ? "Este año" : "Año anterior"]}
+                  formatter={(value, name) => [
+                    `$${value} M`,
+                    name === "currentYear" ? "Este año" : "Año anterior",
+                  ]}
                   contentStyle={{
                     backgroundColor: "var(--color-card)",
                     border: "1px solid var(--color-border)",
@@ -147,7 +150,9 @@ export function DashboardPage() {
           <div className="space-y-3">
             {storeList.map((store) => (
               <div key={store.id} className="flex items-center gap-3">
-                <span className="w-28 shrink-0 truncate text-xs text-muted-foreground">{store.name}</span>
+                <span className="w-28 shrink-0 truncate text-xs text-muted-foreground">
+                  {store.name}
+                </span>
                 <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full"

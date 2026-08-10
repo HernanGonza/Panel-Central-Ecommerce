@@ -30,14 +30,24 @@ export function StoreLayout() {
   const owner = role ? isOwnerRole(role) : false;
 
   const nav: SidebarNavItem[] = [
-    { to: `/tienda/${storeId}/pedidos`, label: "Pedidos", icon: <ClipboardList className="size-4" /> },
+    {
+      to: `/tienda/${storeId}/pedidos`,
+      label: "Pedidos",
+      icon: <ClipboardList className="size-4" />,
+    },
     { to: `/tienda/${storeId}/catalogo`, label: "Catálogo", icon: <Package className="size-4" /> },
     ...(role && canViewStock(role)
       ? [{ to: `/tienda/${storeId}/stock`, label: "Stock", icon: <Boxes className="size-4" /> }]
       : []),
     { to: `/tienda/${storeId}/clientes`, label: "Clientes", icon: <Users className="size-4" /> },
     ...(role && canViewReports(role)
-      ? [{ to: `/tienda/${storeId}/reportes`, label: "Reportes", icon: <BarChart3 className="size-4" /> }]
+      ? [
+          {
+            to: `/tienda/${storeId}/reportes`,
+            label: "Reportes",
+            icon: <BarChart3 className="size-4" />,
+          },
+        ]
       : []),
   ];
 

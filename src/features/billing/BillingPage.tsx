@@ -18,8 +18,12 @@ export function BillingPage() {
 
   const storeName = (id: string) => stores.find((s) => s.id === id)?.name ?? id;
 
-  const facturado = invoices.filter((i) => i.status === "pagado").reduce((sum, i) => sum + i.amount, 0);
-  const pendiente = invoices.filter((i) => i.status === "pendiente").reduce((sum, i) => sum + i.amount, 0);
+  const facturado = invoices
+    .filter((i) => i.status === "pagado")
+    .reduce((sum, i) => sum + i.amount, 0);
+  const pendiente = invoices
+    .filter((i) => i.status === "pendiente")
+    .reduce((sum, i) => sum + i.amount, 0);
 
   return (
     <>
@@ -43,7 +47,10 @@ export function BillingPage() {
                 <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${stat.pct}%`, backgroundColor: METHOD_COLOR[i % METHOD_COLOR.length] }}
+                    style={{
+                      width: `${stat.pct}%`,
+                      backgroundColor: METHOD_COLOR[i % METHOD_COLOR.length],
+                    }}
                   />
                 </div>
               </div>
@@ -66,7 +73,9 @@ export function BillingPage() {
                     label={invoice.status === "pagado" ? "Pagado" : "Pendiente"}
                     tone={INVOICE_STATUS_TONE[invoice.status]}
                   />
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(invoice.amount)}</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {formatCurrency(invoice.amount)}
+                  </span>
                 </div>
               </li>
             ))}

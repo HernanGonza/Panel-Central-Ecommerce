@@ -19,4 +19,9 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   entregado: "Entregado",
 };
 
-export const ORDER_STATUS_ORDER: OrderStatus[] = ["pendiente", "preparando", "enviado", "entregado"];
+export const ORDER_STATUS_ORDER: OrderStatus[] = [
+  "pendiente",
+  "preparando",
+  "enviado",
+  "entregado",
+];
