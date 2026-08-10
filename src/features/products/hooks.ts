@@ -30,3 +30,17 @@ export function useUpdateProduct() {
     },
   });
 }
+
+export function useCategories() {
+  return useQuery({ queryKey: ["categories"], queryFn: () => repositories.categories.list() });
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => repositories.categories.create(name),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}

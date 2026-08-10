@@ -11,6 +11,7 @@ export const products: Product[] = [
     stock: 24,
     unitsSold: 312,
     supplier: "Textil Andina",
+    barcode: "7790000000011",
   },
   {
     id: "p2",
@@ -22,6 +23,7 @@ export const products: Product[] = [
     stock: 6,
     unitsSold: 156,
     supplier: "Confecciones del Sur",
+    barcode: "7790000000028",
   },
   {
     id: "p3",
@@ -33,6 +35,7 @@ export const products: Product[] = [
     stock: 41,
     unitsSold: 189,
     supplier: "Denim Litoral",
+    barcode: "7790000000035",
   },
   {
     id: "p4",
@@ -44,6 +47,7 @@ export const products: Product[] = [
     stock: 12,
     unitsSold: 204,
     supplier: "Cuero & Cía.",
+    barcode: "7790000000042",
   },
   {
     id: "p5",
@@ -55,6 +59,7 @@ export const products: Product[] = [
     stock: 3,
     unitsSold: 94,
     supplier: "Import Urbano",
+    barcode: "7790000000059",
   },
   {
     id: "p6",
@@ -66,6 +71,7 @@ export const products: Product[] = [
     stock: 58,
     unitsSold: 268,
     supplier: "Confecciones del Sur",
+    barcode: "7790000000066",
   },
   {
     id: "p7",
@@ -77,6 +83,7 @@ export const products: Product[] = [
     stock: 4,
     unitsSold: 87,
     supplier: "Textil Andina",
+    barcode: "7790000000073",
   },
   {
     id: "p8",
@@ -88,6 +95,7 @@ export const products: Product[] = [
     stock: 5,
     unitsSold: 121,
     supplier: "Cuero & Cía.",
+    barcode: "7790000000080",
   },
   {
     id: "p9",
@@ -99,6 +107,7 @@ export const products: Product[] = [
     stock: 7,
     unitsSold: 143,
     supplier: "Manufactura Norte",
+    barcode: "7790000000097",
   },
 ];
 
