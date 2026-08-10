@@ -12,3 +12,8 @@ export function canViewStock(role: Role): boolean {
 export function canViewReports(role: Role): boolean {
   return isOwnerRole(role) || role === "gerente";
 }
+
+/** Dueño/administrador y gerente cargan promociones; el vendedor solo las ve. */
+export function canManagePromotions(role: Role): boolean {
+  return isOwnerRole(role) || role === "gerente";
+}

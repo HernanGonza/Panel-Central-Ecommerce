@@ -22,6 +22,7 @@ import { BillingPage } from "@/features/billing/BillingPage";
 import { ReportsPage } from "@/features/reports/ReportsPage";
 import { StoreReportsPage } from "@/features/reports/StoreReportsPage";
 import { UsersPage } from "@/features/users/UsersPage";
+import { PromotionsPage } from "@/features/promotions/PromotionsPage";
 import { NotFoundPage } from "@/features/misc/NotFoundPage";
 
 export const router = createBrowserRouter(
@@ -52,6 +53,7 @@ export const router = createBrowserRouter(
             <Route index element={<Navigate to="pedidos" replace />} />
             <Route path="pedidos" element={<StoreOrdersPage />} />
             <Route path="catalogo" element={<CatalogPage />} />
+            <Route path="promociones" element={<PromotionsPage />} />
             <Route path="clientes" element={<StoreCustomersPage />} />
             <Route element={<RequireStorePermission check={canViewStock} />}>
               <Route path="stock" element={<StoreStockPage />} />

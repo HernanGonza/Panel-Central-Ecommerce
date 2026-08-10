@@ -2,6 +2,7 @@ import type { OrderStatus } from "@/data/types/order";
 import type { InvoiceStatus } from "@/data/types/invoice";
 import type { Role, UserStatus } from "@/data/types/user";
 import type { StoreStatus } from "@/data/types/store";
+import type { PromotionStatus } from "@/data/types/promotion";
 import type { Tone } from "@/lib/tones";
 
 export const ORDER_STATUS_TONE: Record<OrderStatus, Tone> = {
@@ -32,4 +33,11 @@ export const STORE_STATUS_TONE: Record<StoreStatus, Tone> = {
   activa: "success",
   en_incorporacion: "gold",
   inactiva: "neutral",
+};
+
+export const PROMOTION_STATUS_TONE: Record<PromotionStatus, Tone> = {
+  vigente: "success",
+  programada: "teal",
+  vencida: "neutral",
+  apagada: "neutral",
 };

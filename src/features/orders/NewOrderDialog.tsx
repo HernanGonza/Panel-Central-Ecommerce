@@ -13,18 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/features/products/hooks";
-import { useCustomers } from "@/features/customers/hooks";
+import { useCreateCustomer, useCustomers } from "@/features/customers/hooks";
 import { useCreateOrder } from "@/features/orders/hooks";
 import { useAuth } from "@/auth/useAuth";
-import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type OrderStatus } from "@/data/types";
+import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type OrderItem, type OrderStatus } from "@/data/types";
 import { formatCurrency } from "@/lib/format";
 
 const NEW_CUSTOMER = "__new__";
@@ -37,9 +31,20 @@ interface LineItem {
 interface FormValues {
   customerId: string;
   newCustomerName: string;
+  newCustomerPhone: string;
+  newCustomerEmail: string;
   status: OrderStatus;
   lines: LineItem[];
 }
+
+const emptyDefaults: FormValues = {
+  customerId: NEW_CUSTOMER,
+  newCustomerName: "",
+  newCustomerPhone: "",
+  newCustomerEmail: "",
+  status: "pendiente",
+  lines: [{ productId: "", quantity: 1 }],
+};
 
 export function NewOrderDialog({ storeId }: { storeId: string }) {
   const [open, setOpen] = useState(false);
@@ -47,15 +52,9 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
   const { data: products = [] } = useProducts({ storeId });
   const { data: customers = [] } = useCustomers({ storeId });
   const createOrder = useCreateOrder();
+  const createCustomer = useCreateCustomer();
 
-  const form = useForm<FormValues>({
-    defaultValues: {
-      customerId: NEW_CUSTOMER,
-      newCustomerName: "",
-      status: "pendiente",
-      lines: [{ productId: "", quantity: 1 }],
-    },
-  });
+  const form = useForm<FormValues>({ defaultValues: emptyDefaults });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "lines" });
 
   const customerId = form.watch("customerId");
@@ -78,31 +77,49 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
       return;
     }
 
-    const existingCustomer = customers.find((c) => c.id === values.customerId);
-    const customerName = isNewCustomer
-      ? values.newCustomerName.trim()
-      : (existingCustomer?.name ?? "Cliente");
-    const orderTotal = validLines.reduce((sum, line) => {
+    const items: OrderItem[] = validLines.map((line) => {
       const product = products.find((p) => p.id === line.productId);
-      return sum + (product ? product.price * line.quantity : 0);
-    }, 0);
+      return {
+        productId: line.productId,
+        productName: product?.name ?? line.productId,
+        quantity: line.quantity,
+        unitPrice: product?.price ?? 0,
+      };
+    });
+    const orderTotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+
+    let resolvedCustomerId = values.customerId;
+    let customerName: string;
+
+    if (isNewCustomer) {
+      const newCustomer = await createCustomer.mutateAsync({
+        name: values.newCustomerName.trim(),
+        email: values.newCustomerEmail.trim(),
+        phone: values.newCustomerPhone.trim(),
+        docId: "",
+        storeIds: [storeId],
+        purchasesCount: 1,
+        totalSpent: orderTotal,
+        lastPurchaseAt: new Date().toISOString(),
+      });
+      resolvedCustomerId = newCustomer.id;
+      customerName = newCustomer.name;
+    } else {
+      customerName = customers.find((c) => c.id === values.customerId)?.name ?? "Cliente";
+    }
 
     await createOrder.mutateAsync({
       storeId,
-      customerId: isNewCustomer ? `walkin-${Date.now()}` : values.customerId,
+      customerId: resolvedCustomerId,
       customerName,
       status: values.status,
+      items,
       total: orderTotal,
       sellerId: session?.user.id,
     });
 
     toast.success(`Venta cargada para ${customerName}`);
-    form.reset({
-      customerId: NEW_CUSTOMER,
-      newCustomerName: "",
-      status: "pendiente",
-      lines: [{ productId: "", quantity: 1 }],
-    });
+    form.reset(emptyDefaults);
     setOpen(false);
   }
 
@@ -135,11 +152,11 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
               </SelectContent>
             </Select>
             {customerId === NEW_CUSTOMER && (
-              <Input
-                placeholder="Nombre del cliente"
-                {...form.register("newCustomerName")}
-                className="mt-2"
-              />
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <Input placeholder="Nombre" {...form.register("newCustomerName")} />
+                <Input placeholder="Teléfono" {...form.register("newCustomerPhone")} />
+                <Input placeholder="Email" type="email" {...form.register("newCustomerEmail")} />
+              </div>
             )}
           </div>
 
@@ -172,9 +189,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                       step={1}
                       className="w-20"
                       value={line?.quantity ?? 1}
-                      onChange={(e) =>
-                        form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)
-                      }
+                      onChange={(e) => form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)}
                     />
                     <span className="w-24 shrink-0 text-right text-sm text-muted-foreground">
                       {product ? formatCurrency(product.price * (line?.quantity ?? 0)) : "—"}
@@ -193,12 +208,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                 );
               })}
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ productId: "", quantity: 1 })}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1 })}>
               <Plus className="size-3.5" />
               Agregar producto
             </Button>
@@ -206,10 +216,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
 
           <div className="space-y-1.5">
             <Label>Estado inicial</Label>
-            <Select
-              value={form.watch("status")}
-              onValueChange={(v) => form.setValue("status", v as OrderStatus)}
-            >
+            <Select value={form.watch("status")} onValueChange={(v) => form.setValue("status", v as OrderStatus)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -225,13 +232,11 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
 
           <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-3">
             <span className="text-sm font-medium text-foreground">Total</span>
-            <span className="font-display text-lg font-semibold text-foreground">
-              {formatCurrency(total)}
-            </span>
+            <span className="font-display text-lg font-semibold text-foreground">{formatCurrency(total)}</span>
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={createOrder.isPending}>
+            <Button type="submit" disabled={createOrder.isPending || createCustomer.isPending}>
               Registrar venta
             </Button>
           </DialogFooter>

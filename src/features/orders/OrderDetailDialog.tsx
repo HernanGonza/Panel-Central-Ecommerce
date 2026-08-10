@@ -27,10 +27,7 @@ export function OrderDetailDialog({
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <StatusPill
-                  label={ORDER_STATUS_LABEL[order.status]}
-                  tone={ORDER_STATUS_TONE[order.status]}
-                />
+                <StatusPill label={ORDER_STATUS_LABEL[order.status]} tone={ORDER_STATUS_TONE[order.status]} />
                 <span className="font-display text-lg font-semibold text-foreground">
                   {formatCurrency(order.total)}
                 </span>
@@ -47,25 +44,43 @@ export function OrderDetailDialog({
                 </div>
               </dl>
 
+              <div>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">Productos</p>
+                <div className="divide-y divide-border rounded-xl border border-border">
+                  {order.items.map((item) => (
+                    <div key={item.productId} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-foreground">{item.productName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatNumber(item.quantity)} × {formatCurrency(item.unitPrice)}
+                        </p>
+                      </div>
+                      <span className="shrink-0 font-medium text-foreground">
+                        {formatCurrency(item.quantity * item.unitPrice)}
+                      </span>
+                    </div>
+                  ))}
+                  {order.items.length === 0 && (
+                    <p className="px-3 py-2 text-sm text-muted-foreground">Sin detalle de productos.</p>
+                  )}
+                </div>
+              </div>
+
               <div className="rounded-xl border border-border bg-secondary/40 p-4">
                 <p className="text-xs font-medium text-muted-foreground">Cliente</p>
-                <p className="mt-1 font-display text-base font-semibold text-foreground">
-                  {order.customerName}
-                </p>
+                <p className="mt-1 font-display text-base font-semibold text-foreground">{order.customerName}</p>
                 {customer ? (
                   <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-                    <p>{customer.email}</p>
-                    <p>{customer.phone}</p>
-                    <p>DNI/CUIT {customer.docId}</p>
+                    <p>{customer.email || "Sin email"}</p>
+                    <p>{customer.phone || "Sin teléfono"}</p>
+                    {customer.docId && <p>DNI/CUIT {customer.docId}</p>}
                     <p className="pt-1 text-xs">
                       {formatNumber(customer.purchasesCount)} compras históricas ·{" "}
                       {formatCurrency(customer.totalSpent)} acumulados
                     </p>
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Cliente ocasional, sin ficha registrada.
-                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">Cliente ocasional, sin ficha registrada.</p>
                 )}
               </div>
             </div>

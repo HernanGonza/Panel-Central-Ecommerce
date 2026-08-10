@@ -1,4 +1,4 @@
-import type { AppUser, Customer, Invoice, Order, OrderStatus, Product, Store } from "@/data/types";
+import type { AppUser, Customer, Invoice, Order, OrderStatus, Product, Promotion, Store, Supplier } from "@/data/types";
 import type { salesByCategory, salesTrend } from "@/data/fixtures/analytics";
 import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
@@ -42,6 +42,22 @@ export interface InvoiceRepository {
 export interface UserRepository {
   list(filter?: StoreScoped): Promise<AppUser[]>;
   getById(id: string): Promise<AppUser | undefined>;
+}
+
+export interface PromotionRepository {
+  list(filter?: StoreScoped): Promise<Promotion[]>;
+  create(input: Omit<Promotion, "id">): Promise<Promotion>;
+  update(id: string, patch: Partial<Omit<Promotion, "id">>): Promise<Promotion>;
+}
+
+export interface CategoryRepository {
+  list(): Promise<string[]>;
+  create(name: string): Promise<string>;
+}
+
+export interface SupplierRepository {
+  list(): Promise<Supplier[]>;
+  create(input: Omit<Supplier, "id">): Promise<Supplier>;
 }
 
 export interface AnalyticsRepository {

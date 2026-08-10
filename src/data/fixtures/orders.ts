@@ -1,5 +1,6 @@
-import type { Order } from "@/data/types";
+import type { Order, OrderItem } from "@/data/types";
 import { customers } from "@/data/fixtures/customers";
+import { products } from "@/data/fixtures/products";
 
 function daysAgo(n: number): string {
   return new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
@@ -26,20 +27,31 @@ function nextSellerId(storeId: string): string | undefined {
   return sellers[count % sellers.length];
 }
 
+function buildItems(lines: { productId: string; quantity: number }[]): OrderItem[] {
+  return lines.map(({ productId, quantity }) => {
+    const product = products.find((p) => p.id === productId);
+    if (!product) throw new Error(`Producto ${productId} no encontrado en fixtures`);
+    return { productId, productName: product.name, quantity, unitPrice: product.price };
+  });
+}
+
 function order(
   id: string,
   storeId: string,
   customerId: string,
   status: Order["status"],
-  total: number,
   ago: number,
+  lines: { productId: string; quantity: number }[],
 ): Order {
+  const items = buildItems(lines);
+  const total = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   return {
     id,
     storeId,
     customerId,
     customerName: customerName(customerId),
     status,
+    items,
     total,
     createdAt: daysAgo(ago),
     sellerId: nextSellerId(storeId),
@@ -47,30 +59,52 @@ function order(
 }
 
 export const orders: Order[] = [
-  order("#4821", "norte", "gomez", "entregado", 38_900, 2),
-  order("#4822", "centro", "duarte", "preparando", 9_500, 1),
-  order("#4823", "sur", "acosta", "pendiente", 27_300, 0),
-  order("#4824", "norte", "farias", "enviado", 52_000, 1),
-  order("#4825", "este", "ibanez", "entregado", 31_400, 3),
-  order("#4826", "centro", "sosa", "pendiente", 22_800, 0),
-  order("#4827", "norte", "gomez", "enviado", 45_200, 4),
-  order("#4828", "sur", "sosa", "entregado", 18_700, 6),
-  order("#4829", "centro", "duarte", "entregado", 12_300, 7),
-  order("#4830", "este", "acosta", "preparando", 29_800, 2),
-  order("#4831", "norte", "farias", "entregado", 61_000, 8),
-  order("#4832", "sur", "acosta", "enviado", 33_900, 3),
-  order("#4833", "centro", "gomez", "pendiente", 15_400, 0),
-  order("#4834", "este", "ibanez", "preparando", 27_600, 1),
-  order("#4835", "norte", "sosa", "entregado", 42_100, 9),
-  order("#4836", "centro", "farias", "entregado", 19_900, 10),
-  order("#4837", "sur", "duarte", "pendiente", 24_500, 0),
-  order("#4838", "norte", "acosta", "enviado", 55_300, 2),
-  order("#4839", "este", "gomez", "entregado", 21_000, 11),
-  order("#4840", "centro", "ibanez", "preparando", 16_800, 1),
-  order("#4841", "sur", "farias", "entregado", 37_200, 13),
-  order("#4842", "norte", "duarte", "pendiente", 29_900, 0),
-  order("#4843", "centro", "acosta", "enviado", 20_400, 4),
-  order("#4844", "este", "sosa", "entregado", 33_100, 14),
-  order("#4845", "sur", "gomez", "preparando", 26_700, 2),
-  order("#4846", "norte", "ibanez", "entregado", 48_900, 15),
+  // Tienda Norte — p1 Campera de jean oversize, p4 Zapatillas urbanas, p8 Zapatillas running
+  order("#4821", "norte", "gomez", "entregado", 2, [{ productId: "p1", quantity: 1 }]),
+  order("#4824", "norte", "farias", "enviado", 1, [{ productId: "p4", quantity: 1 }]),
+  order("#4827", "norte", "gomez", "enviado", 4, [
+    { productId: "p1", quantity: 1 },
+    { productId: "p8", quantity: 1 },
+  ]),
+  order("#4831", "norte", "farias", "entregado", 8, [
+    { productId: "p4", quantity: 1 },
+    { productId: "p1", quantity: 1 },
+  ]),
+  order("#4835", "norte", "sosa", "entregado", 9, [{ productId: "p8", quantity: 2 }]),
+  order("#4838", "norte", "acosta", "enviado", 2, [{ productId: "p4", quantity: 1 }]),
+  order("#4842", "norte", "duarte", "pendiente", 0, [{ productId: "p1", quantity: 1 }]),
+  order("#4846", "norte", "ibanez", "entregado", 15, [
+    { productId: "p8", quantity: 1 },
+    { productId: "p4", quantity: 1 },
+  ]),
+
+  // Tienda Centro — p2 Remera básica algodón, p6 Buzo canguro friza, p9 Buzo oversize gris
+  order("#4822", "centro", "duarte", "preparando", 1, [{ productId: "p2", quantity: 1 }]),
+  order("#4826", "centro", "sosa", "pendiente", 0, [{ productId: "p6", quantity: 1 }]),
+  order("#4829", "centro", "duarte", "entregado", 7, [{ productId: "p2", quantity: 2 }]),
+  order("#4833", "centro", "gomez", "pendiente", 0, [{ productId: "p9", quantity: 1 }]),
+  order("#4836", "centro", "farias", "entregado", 10, [
+    { productId: "p6", quantity: 1 },
+    { productId: "p2", quantity: 1 },
+  ]),
+  order("#4840", "centro", "ibanez", "preparando", 1, [{ productId: "p2", quantity: 1 }]),
+  order("#4843", "centro", "acosta", "enviado", 4, [{ productId: "p9", quantity: 1 }]),
+
+  // Tienda Sur — p3 Jean recto tiro alto, p7 Campera impermeable
+  order("#4823", "sur", "acosta", "pendiente", 0, [{ productId: "p3", quantity: 1 }]),
+  order("#4828", "sur", "sosa", "entregado", 6, [{ productId: "p3", quantity: 1 }]),
+  order("#4832", "sur", "acosta", "enviado", 3, [{ productId: "p7", quantity: 1 }]),
+  order("#4837", "sur", "duarte", "pendiente", 0, [{ productId: "p3", quantity: 1 }]),
+  order("#4841", "sur", "farias", "entregado", 13, [
+    { productId: "p7", quantity: 1 },
+    { productId: "p3", quantity: 1 },
+  ]),
+  order("#4845", "sur", "gomez", "preparando", 2, [{ productId: "p3", quantity: 2 }]),
+
+  // Tienda Este — p5 Vestido midi estampado
+  order("#4825", "este", "ibanez", "entregado", 3, [{ productId: "p5", quantity: 1 }]),
+  order("#4830", "este", "acosta", "preparando", 2, [{ productId: "p5", quantity: 1 }]),
+  order("#4834", "este", "ibanez", "preparando", 1, [{ productId: "p5", quantity: 2 }]),
+  order("#4839", "este", "gomez", "entregado", 11, [{ productId: "p5", quantity: 1 }]),
+  order("#4844", "este", "sosa", "entregado", 14, [{ productId: "p5", quantity: 2 }]),
 ];

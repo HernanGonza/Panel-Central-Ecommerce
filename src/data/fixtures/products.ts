@@ -102,20 +102,5 @@ export const products: Product[] = [
   },
 ];
 
-export const PRODUCT_CATEGORIES = [
-  "Remeras",
-  "Pantalones",
-  "Abrigo",
-  "Calzado",
-  "Vestidos",
-  "Accesorios",
-] as const;
-
-export const PRODUCT_SUPPLIERS = [
-  "Textil Andina",
-  "Confecciones del Sur",
-  "Denim Litoral",
-  "Cuero & Cía.",
-  "Import Urbano",
-  "Manufactura Norte",
-] as const;
+/** Semilla del catálogo de categorías — el repositorio permite agregar más desde la UI. */
+export const INITIAL_PRODUCT_CATEGORIES = ["Remeras", "Pantalones", "Abrigo", "Calzado", "Vestidos", "Accesorios"];
