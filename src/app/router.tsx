@@ -23,6 +23,7 @@ import { ReportsPage } from "@/features/reports/ReportsPage";
 import { StoreReportsPage } from "@/features/reports/StoreReportsPage";
 import { UsersPage } from "@/features/users/UsersPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
+import { ShippingProvidersPage } from "@/features/shipping/ShippingProvidersPage";
 import { PromotionsPage } from "@/features/promotions/PromotionsPage";
 import { NotFoundPage } from "@/features/misc/NotFoundPage";
 
@@ -41,6 +42,7 @@ export const router = createBrowserRouter(
             <Route path="tiendas" element={<StoresPage />} />
             <Route path="productos" element={<ProductsPage />} />
             <Route path="proveedores" element={<SuppliersPage />} />
+            <Route path="envios" element={<ShippingProvidersPage />} />
             <Route path="stock" element={<StockPage />} />
             <Route path="pedidos" element={<OrdersPage />} />
             <Route path="clientes" element={<CustomersPage />} />

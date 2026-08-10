@@ -21,9 +21,10 @@ import {
 import { useCategories, useProducts } from "@/features/products/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { ProductDialog } from "@/features/products/ProductDialog";
+import { ProductDetailDialog } from "@/features/products/ProductDetailDialog";
 import { useAuth } from "@/auth/useAuth";
 import { canManageCatalog } from "@/auth/permissions";
-import { LOW_STOCK_THRESHOLD } from "@/data/types";
+import { LOW_STOCK_THRESHOLD, type Product } from "@/data/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 const ALL = "__all__";
@@ -31,6 +32,7 @@ const ALL = "__all__";
 export function ProductsView({ storeId }: { storeId?: string | undefined }) {
   const [category, setCategory] = useState<string>(ALL);
   const [storeFilter, setStoreFilter] = useState<string>(ALL);
+  const [selected, setSelected] = useState<Product | null>(null);
   const { data: stores = [] } = useStores();
   const { data: categories = [] } = useCategories();
   const { session } = useAuth();
@@ -107,7 +109,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
             </TableHeader>
             <TableBody>
               {products.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow key={product.id} onClick={() => setSelected(product)} className="cursor-pointer">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <ProductThumbnail name={product.name} imageUrl={product.imageUrl} />
@@ -132,7 +134,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
                     />
                   </TableCell>
                   {canEdit && (
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <ProductDialog product={product} />
                     </TableCell>
                   )}
@@ -152,6 +154,8 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
           </Table>
         </div>
       </SectionCard>
+
+      <ProductDetailDialog product={selected} onOpenChange={(open) => !open && setSelected(null)} />
     </>
   );
 }

@@ -7,6 +7,7 @@ import { memoryUserRepository } from "@/data/repositories/memory/memory-user-rep
 import { memoryPromotionRepository } from "@/data/repositories/memory/memory-promotion-repository";
 import { memoryCategoryRepository } from "@/data/repositories/memory/memory-category-repository";
 import { memorySupplierRepository } from "@/data/repositories/memory/memory-supplier-repository";
+import { memoryShippingProviderRepository } from "@/data/repositories/memory/memory-shipping-provider-repository";
 import { memoryAnalyticsRepository } from "@/data/repositories/memory/memory-analytics-repository";
 
 /**
@@ -25,5 +26,6 @@ export const repositories = {
   promotions: memoryPromotionRepository,
   categories: memoryCategoryRepository,
   suppliers: memorySupplierRepository,
+  shippingProviders: memoryShippingProviderRepository,
   analytics: memoryAnalyticsRepository,
 };

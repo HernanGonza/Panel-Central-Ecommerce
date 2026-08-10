@@ -3,6 +3,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BarcodeScannerDialog } from "@/components/shared/BarcodeScannerDialog";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +64,23 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
     const product = products.find((p) => p.id === line.productId);
     return sum + (product ? product.price * (line.quantity || 0) : 0);
   }, 0);
+
+  function handleScan(code: string) {
+    const product = products.find((p) => p.barcode === code);
+    if (!product) {
+      toast.error("Ningún producto de esta tienda tiene ese código");
+      return;
+    }
+    const existingIndex = lines.findIndex((l) => l.productId === product.id);
+    if (existingIndex >= 0) {
+      form.setValue(`lines.${existingIndex}.quantity`, (lines[existingIndex]?.quantity ?? 0) + 1);
+    } else {
+      const emptyIndex = lines.findIndex((l) => !l.productId);
+      if (emptyIndex >= 0) form.setValue(`lines.${emptyIndex}.productId`, product.id);
+      else append({ productId: product.id, quantity: 1 });
+    }
+    toast.success(`${product.name} agregado`);
+  }
 
   async function onSubmit(values: FormValues) {
     const validLines = values.lines.filter((l) => l.productId && l.quantity > 0);
