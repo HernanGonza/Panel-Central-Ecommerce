@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 import {
@@ -13,16 +14,19 @@ import {
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { SectionCard } from "@/components/shared/SectionCard";
+import { AnimatedBar } from "@/components/shared/AnimatedBar";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/features/dashboard/hooks";
+import { OrderDetailDialog } from "@/features/orders/OrderDetailDialog";
 import { formatCurrencyCompact, formatNumber, formatRelativeDate } from "@/lib/format";
-import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER } from "@/data/types";
+import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type Order } from "@/data/types";
 import { ORDER_STATUS_TONE, STORE_STATUS_TONE } from "@/lib/status-tones";
 import { TONE_COLOR } from "@/lib/tones";
 
 export function DashboardPage() {
   const { stores, orderStatusCounts, recentOrders, salesTrend } = useDashboardData();
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const storeList = stores.data ?? [];
   const totalStock = storeList.reduce((sum, s) => sum + s.stockUnits, 0);
@@ -46,13 +50,33 @@ export function DashboardPage() {
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Tiendas activas" value={String(storeList.length)} tone="clay" />
-        <StatCard label="Stock consolidado" value={`${formatNumber(totalStock)} u.`} tone="teal" />
-        <StatCard label="Pedidos del mes" value={formatNumber(totalOrders)} tone="gold" />
-        <StatCard label="Facturación" value={formatCurrencyCompact(totalSales)} tone="ink" />
+        <StatCard
+          label="Tiendas activas"
+          value={String(storeList.length)}
+          tone="clay"
+          to="/admin/tiendas"
+        />
+        <StatCard
+          label="Stock consolidado"
+          value={`${formatNumber(totalStock)} u.`}
+          tone="teal"
+          to="/admin/stock"
+        />
+        <StatCard
+          label="Pedidos del mes"
+          value={formatNumber(totalOrders)}
+          tone="gold"
+          to="/admin/pedidos"
+        />
+        <StatCard
+          label="Facturación"
+          value={formatCurrencyCompact(totalSales)}
+          tone="ink"
+          to="/admin/facturacion"
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
         <SectionCard
           title="Ventas consolidadas"
           subtitle="Últimos 12 meses · todas las tiendas"
@@ -123,29 +147,35 @@ export function DashboardPage() {
         </SectionCard>
 
         <SectionCard title="Pedidos recientes">
-          <ul className="space-y-4">
+          <ul className="space-y-1">
             {(recentOrders.data ?? []).slice(0, 5).map((order) => (
-              <li key={order.id} className="flex items-start gap-3">
-                <span
-                  className="mt-1 size-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: TONE_COLOR[ORDER_STATUS_TONE[order.status]] }}
-                  aria-hidden
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {order.id} · {order.customerName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {ORDER_STATUS_LABEL[order.status]} · {formatRelativeDate(order.createdAt)}
-                  </p>
-                </div>
+              <li key={order.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(order)}
+                  className="flex w-full items-start gap-3 rounded-lg p-1.5 text-left transition-colors hover:bg-secondary"
+                >
+                  <span
+                    className="mt-1 size-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: TONE_COLOR[ORDER_STATUS_TONE[order.status]] }}
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {order.id} · {order.customerName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {ORDER_STATUS_LABEL[order.status]} · {formatRelativeDate(order.createdAt)}
+                    </p>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
         </SectionCard>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         <SectionCard title="Stock consolidado por tienda">
           <div className="space-y-3">
             {storeList.map((store) => (
@@ -153,15 +183,11 @@ export function DashboardPage() {
                 <span className="w-28 shrink-0 truncate text-xs text-muted-foreground">
                   {store.name}
                 </span>
-                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${(store.stockUnits / maxStock) * 100}%`,
-                      backgroundColor: TONE_COLOR[STORE_STATUS_TONE[store.status]],
-                    }}
-                  />
-                </div>
+                <AnimatedBar
+                  pct={(store.stockUnits / maxStock) * 100}
+                  color={TONE_COLOR[STORE_STATUS_TONE[store.status]]}
+                  trackClassName="mt-0 flex-1"
+                />
                 <span className="w-16 shrink-0 text-right text-xs font-medium text-foreground">
                   {formatNumber(store.stockUnits)}
                 </span>
@@ -173,16 +199,25 @@ export function DashboardPage() {
         <SectionCard title="Pedidos por estado">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {ORDER_STATUS_ORDER.map((status) => (
-              <div key={status} className="rounded-xl bg-secondary/60 p-3">
+              <Link
+                key={status}
+                to={`/admin/pedidos?status=${status}`}
+                className="block rounded-xl bg-secondary/60 p-3 transition-colors hover:bg-secondary"
+              >
                 <StatusPill label={ORDER_STATUS_LABEL[status]} tone={ORDER_STATUS_TONE[status]} />
                 <p className="mt-3 font-display text-xl font-semibold text-foreground">
                   {orderStatusCounts.data?.[status] ?? 0}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </SectionCard>
       </div>
+
+      <OrderDetailDialog
+        order={selectedOrder}
+        onOpenChange={(open) => !open && setSelectedOrder(null)}
+      />
     </>
   );
 }

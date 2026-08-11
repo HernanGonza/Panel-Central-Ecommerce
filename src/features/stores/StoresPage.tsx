@@ -56,7 +56,7 @@ export function StoresPage() {
               </div>
             </div>
             <Link
-              to={`/tienda/${store.id}/pedidos`}
+              to={`/tienda/${store.id}/general`}
               className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
             >
               Ver panel de la tienda

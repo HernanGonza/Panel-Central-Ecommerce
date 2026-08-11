@@ -4,5 +4,5 @@ import { isOwnerRole, type AppUser } from "@/data/types";
 export function homePathForUser(user: AppUser): string {
   if (isOwnerRole(user.role)) return "/admin/general";
   const storeId = user.storeIds[0];
-  return storeId ? `/tienda/${storeId}/pedidos` : "/login";
+  return storeId ? `/tienda/${storeId}/general` : "/login";
 }

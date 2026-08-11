@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { TONE_COLOR, withAlpha, type Tone } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 
@@ -6,22 +7,19 @@ export function StatCard({
   value,
   delta,
   tone = "clay",
+  to,
   className,
 }: {
   label: string;
   value: string;
   delta?: string;
   tone?: Tone;
+  to?: string;
   className?: string;
 }) {
   const color = TONE_COLOR[tone];
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]",
-        className,
-      )}
-    >
+  const content = (
+    <>
       <div className="flex items-start justify-between">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <span
@@ -39,6 +37,22 @@ export function StatCard({
           {delta}
         </span>
       )}
-    </div>
+    </>
   );
+
+  const baseClassName = cn(
+    "rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]",
+    to && "block transition-colors hover:bg-secondary/40 hover:border-accent/40",
+    className,
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className={baseClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={baseClassName}>{content}</div>;
 }

@@ -1,19 +1,27 @@
+import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
-import { useInvoices, usePaymentMethodStats } from "@/features/billing/hooks";
+import { AnimatedBar } from "@/components/shared/AnimatedBar";
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
+import { useInvoices } from "@/features/billing/hooks";
 import { useStores } from "@/features/stores/hooks";
 import { INVOICE_STATUS_TONE } from "@/lib/status-tones";
-import { PAYMENT_METHOD_LABEL } from "@/data/types";
+import { PAYMENT_METHOD_LABEL, type PaymentMethod } from "@/data/types";
 import { formatCurrency, formatCurrencyCompact, formatRelativeDate } from "@/lib/format";
 import { TONE_COLOR } from "@/lib/tones";
 
 const METHOD_COLOR = [TONE_COLOR.clay, TONE_COLOR.teal, TONE_COLOR.gold, TONE_COLOR.success];
+const METHOD_ORDER = Object.keys(PAYMENT_METHOD_LABEL) as PaymentMethod[];
 
 export function BillingPage() {
-  const { data: invoices = [] } = useInvoices();
-  const { data: methodStats = [] } = usePaymentMethodStats();
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const { data: invoices = [] } = useInvoices({
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+  });
   const { data: stores = [] } = useStores();
 
   const storeName = (id: string) => stores.find((s) => s.id === id)?.name ?? id;
@@ -25,6 +33,20 @@ export function BillingPage() {
     .filter((i) => i.status === "pendiente")
     .reduce((sum, i) => sum + i.amount, 0);
 
+  const methodTotals = new Map<PaymentMethod, number>();
+  for (const invoice of invoices) {
+    methodTotals.set(invoice.method, (methodTotals.get(invoice.method) ?? 0) + invoice.amount);
+  }
+  const methodGrandTotal = invoices.reduce((sum, i) => sum + i.amount, 0);
+  const methodStats = METHOD_ORDER.map((method) => {
+    const amount = methodTotals.get(method) ?? 0;
+    return {
+      method,
+      amount,
+      pct: methodGrandTotal > 0 ? Math.round((amount / methodGrandTotal) * 100) : 0,
+    };
+  }).filter((stat) => stat.amount > 0);
+
   return (
     <>
       <PageHeader title="Facturación" subtitle="Medios de pago y comprobantes por tienda" />
@@ -35,8 +57,19 @@ export function BillingPage() {
         <StatCard label="Medios activos" value={String(methodStats.length)} tone="success" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCard title="Medios de pago" subtitle="Participación sobre el total facturado">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        <SectionCard
+          title="Medios de pago"
+          subtitle="Participación sobre el total facturado"
+          action={
+            <DateRangeFilter
+              from={dateFrom}
+              to={dateTo}
+              onFromChange={setDateFrom}
+              onToChange={setDateTo}
+            />
+          }
+        >
           <div className="space-y-4">
             {methodStats.map((stat, i) => (
               <div key={stat.method}>
@@ -44,17 +77,14 @@ export function BillingPage() {
                   <span className="text-foreground">{PAYMENT_METHOD_LABEL[stat.method]}</span>
                   <span className="font-semibold text-foreground">{stat.pct} %</span>
                 </div>
-                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${stat.pct}%`,
-                      backgroundColor: METHOD_COLOR[i % METHOD_COLOR.length],
-                    }}
-                  />
-                </div>
+                <AnimatedBar pct={stat.pct} color={METHOD_COLOR[i % METHOD_COLOR.length]!} />
               </div>
             ))}
+            {methodStats.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No hay comprobantes en el rango elegido.
+              </p>
+            )}
           </div>
         </SectionCard>
 
@@ -79,6 +109,11 @@ export function BillingPage() {
                 </div>
               </li>
             ))}
+            {invoices.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No hay comprobantes en el rango elegido.
+              </p>
+            )}
           </ul>
         </SectionCard>
       </div>

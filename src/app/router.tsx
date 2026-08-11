@@ -9,6 +9,7 @@ import { RootRedirect } from "@/features/auth/RootRedirect";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { StoreLayout } from "@/layouts/StoreLayout";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { StoreDashboardPage } from "@/features/dashboard/StoreDashboardPage";
 import { StoresPage } from "@/features/stores/StoresPage";
 import { ProductsPage } from "@/features/products/ProductsPage";
 import { CatalogPage } from "@/features/products/CatalogPage";
@@ -55,7 +56,8 @@ export const router = createBrowserRouter(
 
         <Route path="/tienda/:storeId" element={<RequireStoreAccess />}>
           <Route element={<StoreLayout />}>
-            <Route index element={<Navigate to="pedidos" replace />} />
+            <Route index element={<Navigate to="general" replace />} />
+            <Route path="general" element={<StoreDashboardPage />} />
             <Route path="pedidos" element={<StoreOrdersPage />} />
             <Route path="catalogo" element={<CatalogPage />} />
             <Route element={<RequireStorePermission check={canViewPriceLookup} />}>

@@ -3,6 +3,7 @@ import { Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ClipboardList,
+  LayoutDashboard,
   Package,
   Boxes,
   Users,
@@ -44,6 +45,11 @@ export function StoreLayout() {
   const owner = role ? isOwnerRole(role) : false;
 
   const nav: SidebarNavItem[] = [
+    {
+      to: `/tienda/${storeId}/general`,
+      label: "Panel general",
+      icon: <LayoutDashboard className="size-4" />,
+    },
     {
       to: `/tienda/${storeId}/pedidos`,
       label: "Pedidos",
@@ -109,7 +115,7 @@ export function StoreLayout() {
                 <ArrowLeft className="size-3.5" />
                 Volver al panel general
               </button>
-              <Select value={storeId} onValueChange={(next) => navigate(`/tienda/${next}/pedidos`)}>
+              <Select value={storeId} onValueChange={(next) => navigate(`/tienda/${next}/general`)}>
                 <SelectTrigger size="sm" className="w-full">
                   <SelectValue placeholder="Cambiar de tienda" />
                 </SelectTrigger>

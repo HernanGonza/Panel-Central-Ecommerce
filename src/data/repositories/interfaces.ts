@@ -11,7 +11,6 @@ import type {
   Supplier,
 } from "@/data/types";
 import type { salesByCategory, salesTrend } from "@/data/fixtures/analytics";
-import type { paymentMethodStats } from "@/data/fixtures/invoices";
 
 /** `storeId` viaja como `string | undefined` en toda la app (viene de useParams/props opcionales). */
 export interface StoreScoped {
@@ -32,8 +31,14 @@ export interface ProductRepository {
   update(id: string, patch: Partial<Omit<Product, "id">>): Promise<Product>;
 }
 
+/** `dateFrom`/`dateTo` son fechas `YYYY-MM-DD` (inclusive en ambos extremos). */
+export interface DateRangeFilter {
+  dateFrom?: string | undefined;
+  dateTo?: string | undefined;
+}
+
 /** `sellerId` acota a las ventas cargadas por ese vendedor/gerente — lo usan tanto el panel de un vendedor (forzado a su propio id) como el filtro de "Vendedor" que ven gerente/dueño. */
-export interface OrderFilter extends StoreScoped {
+export interface OrderFilter extends StoreScoped, DateRangeFilter {
   status?: OrderStatus | undefined;
   sellerId?: string | undefined;
 }
@@ -52,10 +57,9 @@ export interface CustomerRepository {
 }
 
 export interface InvoiceRepository {
-  list(filter?: StoreScoped): Promise<Invoice[]>;
+  list(filter?: StoreScoped & DateRangeFilter): Promise<Invoice[]>;
   getByOrderId(orderId: string): Promise<Invoice | undefined>;
   create(input: Omit<Invoice, "id">): Promise<Invoice>;
-  paymentMethodStats(): Promise<typeof paymentMethodStats>;
 }
 
 export interface UserRepository {

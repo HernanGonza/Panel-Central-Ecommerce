@@ -46,10 +46,3 @@ export const invoices: Invoice[] = [
     date: daysAgo(4),
   },
 ];
-
-export const paymentMethodStats = [
-  { method: "mercado_pago", pct: 42 },
-  { method: "transferencia", pct: 24 },
-  { method: "tarjeta", pct: 22 },
-  { method: "efectivo_local", pct: 12 },
-] as const;

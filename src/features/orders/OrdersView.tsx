@@ -1,8 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ArrowDown, ArrowUp, ArrowUpDown, Download } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { StatusPill } from "@/components/shared/StatusPill";
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -87,12 +89,33 @@ export function OrdersView({
   const canFilterSellers = role ? isOwnerRole(role) || role === "gerente" : false;
   const showSellerColumns = !isVendedor;
 
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get("status");
+  const initialStatus = ORDER_STATUS_ORDER.includes(statusParam as OrderStatus)
+    ? (statusParam as OrderStatus)
+    : null;
+
+  const [statusFilter, setStatusFilterState] = useState<OrderStatus | null>(initialStatus);
   const [sellerFilter, setSellerFilter] = useState<string>(ALL_SELLERS);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [sort, setSort] = useState<SortState>({ key: "createdAt", dir: "desc" });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const { data: stores = [] } = useStores();
   const { data: sellers = [] } = useUsers({ storeId });
+
+  function setStatusFilter(status: OrderStatus | null) {
+    setStatusFilterState(status);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (status) next.set("status", status);
+        else next.delete("status");
+        return next;
+      },
+      { replace: true },
+    );
+  }
 
   // Un vendedor solo ve sus propias ventas; gerente/dueño pueden filtrar por vendedor.
   const sellerId = isVendedor
@@ -101,8 +124,14 @@ export function OrdersView({
       ? undefined
       : sellerFilter;
 
-  const { data: statusCounts } = useOrderStatusCounts({ storeId, sellerId });
-  const { data: orders = [] } = useOrders({ storeId, status: statusFilter ?? undefined, sellerId });
+  const dateRange = { dateFrom: dateFrom || undefined, dateTo: dateTo || undefined };
+  const { data: statusCounts } = useOrderStatusCounts({ storeId, sellerId, ...dateRange });
+  const { data: orders = [] } = useOrders({
+    storeId,
+    status: statusFilter ?? undefined,
+    sellerId,
+    ...dateRange,
+  });
 
   const storeName = (id: string) => stores.find((s) => s.id === id)?.name ?? id;
   const sellerName = (id: string) => sellers.find((u) => u.id === id)?.name ?? id;
@@ -200,6 +229,12 @@ export function OrdersView({
         subtitle="Tocá un pedido para ver el detalle del cliente"
         action={
           <div className="flex flex-wrap items-center gap-2">
+            <DateRangeFilter
+              from={dateFrom}
+              to={dateTo}
+              onFromChange={setDateFrom}
+              onToChange={setDateTo}
+            />
             {canFilterSellers && (
               <Select value={sellerFilter} onValueChange={setSellerFilter}>
                 <SelectTrigger size="sm" className="w-44">

@@ -2,6 +2,7 @@ import type { OrderRepository } from "@/data/repositories/interfaces";
 import { orders as orderFixtures } from "@/data/fixtures/orders";
 import { ORDER_STATUS_ORDER, type Order, type OrderStatus } from "@/data/types";
 import { delay } from "@/data/repositories/memory/delay";
+import { withinDateRange } from "@/data/repositories/memory/date-range-filter";
 
 const orders: Order[] = [...orderFixtures];
 let nextNum = Math.max(...orders.map((o) => parseInt(o.id.replace("#", ""), 10))) + 1;
@@ -12,6 +13,9 @@ export const memoryOrderRepository: OrderRepository = {
     if (filter?.storeId) result = result.filter((o) => o.storeId === filter.storeId);
     if (filter?.status) result = result.filter((o) => o.status === filter.status);
     if (filter?.sellerId) result = result.filter((o) => o.sellerId === filter.sellerId);
+    if (filter?.dateFrom || filter?.dateTo) {
+      result = result.filter((o) => withinDateRange(o.createdAt, filter));
+    }
     return delay(
       [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     );
@@ -22,6 +26,9 @@ export const memoryOrderRepository: OrderRepository = {
   async countByStatus(filter) {
     let scoped = filter?.storeId ? orders.filter((o) => o.storeId === filter.storeId) : orders;
     if (filter?.sellerId) scoped = scoped.filter((o) => o.sellerId === filter.sellerId);
+    if (filter?.dateFrom || filter?.dateTo) {
+      scoped = scoped.filter((o) => withinDateRange(o.createdAt, filter));
+    }
     const counts = Object.fromEntries(ORDER_STATUS_ORDER.map((s) => [s, 0])) as Record<
       OrderStatus,
       number

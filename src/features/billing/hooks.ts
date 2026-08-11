@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { repositories } from "@/data/repositories";
+import type { DateRangeFilter, StoreScoped } from "@/data/repositories/interfaces";
 import type { Invoice } from "@/data/types";
 
-export function useInvoices() {
-  return useQuery({ queryKey: ["invoices"], queryFn: () => repositories.invoices.list() });
+export function useInvoices(filter?: StoreScoped & DateRangeFilter) {
+  return useQuery({
+    queryKey: ["invoices", filter ?? {}],
+    queryFn: () => repositories.invoices.list(filter),
+  });
 }
 
 export function useInvoiceByOrder(orderId: string | undefined) {
@@ -21,12 +25,5 @@ export function useCreateInvoice() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
-  });
-}
-
-export function usePaymentMethodStats() {
-  return useQuery({
-    queryKey: ["invoices", "payment-method-stats"],
-    queryFn: () => repositories.invoices.paymentMethodStats(),
   });
 }

@@ -9,7 +9,7 @@ export function RequireStorePermission({ check }: { check: (role: Role) => boole
 
   if (!session) return <Navigate to="/login" replace />;
   if (!check(session.user.role)) {
-    return <Navigate to={`/tienda/${storeId}/pedidos`} replace />;
+    return <Navigate to={`/tienda/${storeId}/general`} replace />;
   }
 
   return <Outlet />;

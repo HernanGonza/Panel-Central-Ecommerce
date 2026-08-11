@@ -30,5 +30,9 @@ export function formatRelativeDate(iso: string): string {
   const date = new Date(iso);
   const isToday = date.toDateString() === new Date().toDateString();
   if (isToday) return "Hoy";
-  return `Hace ${formatDistanceToNow(date, { locale: es })}`;
+  const shortDate = date.toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
+  const isYesterday =
+    date.toDateString() === new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
+  if (isYesterday) return `Ayer · ${shortDate}`;
+  return `Hace ${formatDistanceToNow(date, { locale: es })} · ${shortDate}`;
 }
