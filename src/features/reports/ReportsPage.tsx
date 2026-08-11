@@ -99,7 +99,7 @@ export function ReportsPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SectionCard title="Ventas por categoría" subtitle="Participación sobre el total del mes">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
             <div className="relative size-40 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

@@ -17,3 +17,7 @@ export function canViewReports(role: Role): boolean {
 export function canManagePromotions(role: Role): boolean {
   return isOwnerRole(role) || role === "gerente";
 }
+
+export function canViewPriceLookup(role: Role): boolean {
+  return role === "vendedor" || role === "gerente";
+}

@@ -5,6 +5,7 @@ import { Bell, BellOff, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/auth/useAuth";
 import { notificationPermission, requestNotificationPermission } from "@/lib/notifications";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export interface SidebarNavItem {
   to: string;
@@ -49,15 +50,19 @@ export function Sidebar({
   brand,
   items,
   footer,
+  mobileOpen,
+  onMobileOpenChange,
 }: {
   brand: ReactNode;
   items: SidebarNavItem[];
   footer?: ReactNode;
+  mobileOpen: boolean;
+  onMobileOpenChange: (open: boolean) => void;
 }) {
   const { session, logout } = useAuth();
 
-  return (
-    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-card">
+  const content = (
+    <>
       <div className="flex items-center gap-2.5 px-5 py-5">{brand}</div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
@@ -65,6 +70,7 @@ export function Sidebar({
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={() => onMobileOpenChange(false)}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -99,6 +105,20 @@ export function Sidebar({
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <aside className="hidden h-full w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
+        {content}
+      </aside>
+      <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
+        <SheetContent side="left" className="flex w-72 max-w-[80vw] flex-col gap-0 p-0">
+          <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
+          {content}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

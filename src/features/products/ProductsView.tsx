@@ -90,7 +90,7 @@ export function ProductsView({ storeId }: { storeId?: string | undefined }) {
         title={storeId ? "Catálogo" : "Catálogo de productos"}
         subtitle={storeId ? undefined : "Consolidado de todas las tiendas"}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {!storeId && (
               <Select value={storeFilter} onValueChange={setStoreFilter}>
                 <SelectTrigger size="sm" className="w-40">

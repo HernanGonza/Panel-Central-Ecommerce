@@ -15,14 +15,16 @@ export function StockPage() {
       <PageHeader title="Stock" subtitle="Inventario consolidado y por tienda" />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value={CONSOLIDATED}>Consolidado</TabsTrigger>
-          {stores.map((store) => (
-            <TabsTrigger key={store.id} value={store.id}>
-              {store.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList>
+            <TabsTrigger value={CONSOLIDATED}>Consolidado</TabsTrigger>
+            {stores.map((store) => (
+              <TabsTrigger key={store.id} value={store.id}>
+                {store.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         <TabsContent value={CONSOLIDATED} className="mt-4">
           <StockView />
         </TabsContent>

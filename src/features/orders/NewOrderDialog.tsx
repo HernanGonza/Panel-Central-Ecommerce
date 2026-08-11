@@ -194,7 +194,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
           Nueva venta
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Nueva venta</DialogTitle>
         </DialogHeader>
@@ -230,12 +230,12 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                 const line = lines[index];
                 const product = products.find((p) => p.id === line?.productId);
                 return (
-                  <div key={field.id} className="flex items-center gap-2">
+                  <div key={field.id} className="flex flex-wrap items-center gap-2">
                     <Select
                       value={line?.productId ?? ""}
                       onValueChange={(v) => form.setValue(`lines.${index}.productId`, v)}
                     >
-                      <SelectTrigger className="flex-1">
+                      <SelectTrigger className="w-full sm:w-auto sm:min-w-0 sm:flex-1">
                         <SelectValue placeholder="Elegir producto" />
                       </SelectTrigger>
                       <SelectContent>
@@ -246,34 +246,36 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Input
-                      type="number"
-                      min={1}
-                      step={1}
-                      className="w-20"
-                      value={line?.quantity ?? 1}
-                      onChange={(e) =>
-                        form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)
-                      }
-                    />
-                    <span className="w-24 shrink-0 text-right text-sm text-muted-foreground">
-                      {product ? formatCurrency(product.price * (line?.quantity ?? 0)) : "—"}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 shrink-0"
-                      onClick={() => remove(index)}
-                      disabled={fields.length === 1}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </Button>
+                    <div className="flex flex-1 items-center gap-2 sm:flex-none">
+                      <Input
+                        type="number"
+                        min={1}
+                        step={1}
+                        className="w-20"
+                        value={line?.quantity ?? 1}
+                        onChange={(e) =>
+                          form.setValue(`lines.${index}.quantity`, e.target.valueAsNumber || 1)
+                        }
+                      />
+                      <span className="w-20 shrink-0 text-right text-sm text-muted-foreground sm:w-24">
+                        {product ? formatCurrency(product.price * (line?.quantity ?? 0)) : "—"}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0"
+                        onClick={() => remove(index)}
+                        disabled={fields.length === 1}
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -294,7 +296,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>Estado del pedido</Label>
               <Select

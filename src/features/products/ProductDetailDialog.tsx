@@ -24,7 +24,7 @@ export function ProductDetailDialog({
 
   return (
     <Dialog open={product !== null} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         {product && (
           <>
             <DialogHeader>

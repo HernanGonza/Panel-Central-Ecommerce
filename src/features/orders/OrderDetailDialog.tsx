@@ -21,7 +21,7 @@ export function OrderDetailDialog({
 
   return (
     <Dialog open={order !== null} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         {order && (
           <>
             <DialogHeader>

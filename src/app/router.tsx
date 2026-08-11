@@ -3,7 +3,7 @@ import { RequireAuth } from "@/auth/RequireAuth";
 import { RequireOwnerRole } from "@/auth/RequireOwnerRole";
 import { RequireStoreAccess } from "@/auth/RequireStoreAccess";
 import { RequireStorePermission } from "@/auth/RequireStorePermission";
-import { canViewReports, canViewStock } from "@/auth/permissions";
+import { canViewPriceLookup, canViewReports, canViewStock } from "@/auth/permissions";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { RootRedirect } from "@/features/auth/RootRedirect";
 import { AdminLayout } from "@/layouts/AdminLayout";
@@ -12,6 +12,7 @@ import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { StoresPage } from "@/features/stores/StoresPage";
 import { ProductsPage } from "@/features/products/ProductsPage";
 import { CatalogPage } from "@/features/products/CatalogPage";
+import { PriceLookupPage } from "@/features/products/PriceLookupPage";
 import { StockPage } from "@/features/stock/StockPage";
 import { StoreStockPage } from "@/features/stock/StoreStockPage";
 import { OrdersPage } from "@/features/orders/OrdersPage";
@@ -57,6 +58,9 @@ export const router = createBrowserRouter(
             <Route index element={<Navigate to="pedidos" replace />} />
             <Route path="pedidos" element={<StoreOrdersPage />} />
             <Route path="catalogo" element={<CatalogPage />} />
+            <Route element={<RequireStorePermission check={canViewPriceLookup} />}>
+              <Route path="precios" element={<PriceLookupPage />} />
+            </Route>
             <Route path="promociones" element={<PromotionsPage />} />
             <Route path="clientes" element={<StoreCustomersPage />} />
             <Route element={<RequireStorePermission check={canViewStock} />}>

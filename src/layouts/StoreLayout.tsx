@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -9,12 +10,15 @@ import {
   Store,
   ArrowLeft,
   Percent,
+  Menu,
+  ScanLine,
 } from "lucide-react";
 import { Sidebar, type SidebarNavItem } from "@/components/shared/Sidebar";
 import { repositories } from "@/data/repositories";
 import { useAuth } from "@/auth/useAuth";
-import { canViewReports, canViewStock } from "@/auth/permissions";
+import { canViewPriceLookup, canViewReports, canViewStock } from "@/auth/permissions";
 import { isOwnerRole } from "@/data/types";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -27,6 +31,7 @@ export function StoreLayout() {
   const { storeId } = useParams<{ storeId: string }>();
   const { session } = useAuth();
   const navigate = useNavigate();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { data: stores } = useQuery({
     queryKey: ["stores"],
     queryFn: () => repositories.stores.list(),
@@ -45,6 +50,15 @@ export function StoreLayout() {
       icon: <ClipboardList className="size-4" />,
     },
     { to: `/tienda/${storeId}/catalogo`, label: "Catálogo", icon: <Package className="size-4" /> },
+    ...(role && canViewPriceLookup(role)
+      ? [
+          {
+            to: `/tienda/${storeId}/precios`,
+            label: "Consulta de precios",
+            icon: <ScanLine className="size-4" />,
+          },
+        ]
+      : []),
     {
       to: `/tienda/${storeId}/promociones`,
       label: "Promociones",
@@ -82,6 +96,8 @@ export function StoreLayout() {
           </>
         }
         items={nav}
+        mobileOpen={mobileNavOpen}
+        onMobileOpenChange={setMobileNavOpen}
         footer={
           owner ? (
             <div className="space-y-2 border-t border-border px-3 py-3">
@@ -109,11 +125,31 @@ export function StoreLayout() {
           ) : undefined
         }
       />
-      <main className="min-w-0 flex-1 overflow-y-auto p-8">
-        <div className="mx-auto max-w-6xl space-y-6">
-          <Outlet />
-        </div>
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-9 shrink-0"
+            onClick={() => setMobileNavOpen(true)}
+          >
+            <Menu className="size-4" />
+            <span className="sr-only">Abrir menú</span>
+          </Button>
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+            <Store className="size-3.5" />
+          </span>
+          <span className="truncate font-display text-sm font-semibold text-foreground">
+            {store?.name ?? "Tienda"}
+          </span>
+        </header>
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-6xl space-y-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

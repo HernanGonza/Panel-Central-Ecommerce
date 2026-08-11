@@ -33,22 +33,24 @@ export function StoresPage() {
               />
             }
           >
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">Ventas del mes</p>
-                <p className="mt-1 font-display text-lg font-semibold text-foreground">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
+                  Ventas del mes
+                </p>
+                <p className="mt-1 truncate font-display text-base font-semibold text-foreground sm:text-lg">
                   {formatCurrencyCompact(store.monthlySales)}
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Stock</p>
-                <p className="mt-1 font-display text-lg font-semibold text-foreground">
+              <div className="min-w-0">
+                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">Stock</p>
+                <p className="mt-1 truncate font-display text-base font-semibold text-foreground sm:text-lg">
                   {formatNumber(store.stockUnits)} u.
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Pedidos</p>
-                <p className="mt-1 font-display text-lg font-semibold text-foreground">
+              <div className="min-w-0">
+                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">Pedidos</p>
+                <p className="mt-1 truncate font-display text-base font-semibold text-foreground sm:text-lg">
                   {formatNumber(store.ordersCount)}
                 </p>
               </div>
