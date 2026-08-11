@@ -16,7 +16,9 @@ import { useProducts } from "@/features/products/hooks";
 import { useCustomers } from "@/features/customers/hooks";
 import { useOrders } from "@/features/orders/hooks";
 import { useUsers } from "@/features/users/hooks";
+import { ORDER_CHANNEL_LABEL, ORDER_CHANNEL_ORDER } from "@/data/types";
 import { formatCurrency, formatCurrencyCompact, formatNumber } from "@/lib/format";
+import { ORDER_CHANNEL_TONE } from "@/lib/status-tones";
 import { TONE_COLOR } from "@/lib/tones";
 
 const CATEGORY_COLOR = [TONE_COLOR.clay, TONE_COLOR.teal, TONE_COLOR.gold, TONE_COLOR.success];
@@ -92,6 +94,26 @@ export function ReportsPage() {
   );
 
   const maxMargin = Math.max(1, ...marginByCategory.map((c) => c.margin));
+
+  const channelBreakdown = useMemo(() => {
+    const totals = new Map<string, { count: number; total: number }>();
+    for (const o of orders) {
+      const entry = totals.get(o.channel) ?? { count: 0, total: 0 };
+      entry.count += 1;
+      entry.total += o.total;
+      totals.set(o.channel, entry);
+    }
+    const grandTotal = orders.reduce((sum, o) => sum + o.total, 0);
+    return ORDER_CHANNEL_ORDER.map((channel) => {
+      const entry = totals.get(channel) ?? { count: 0, total: 0 };
+      return {
+        channel,
+        count: entry.count,
+        total: entry.total,
+        pct: grandTotal > 0 ? (entry.total / grandTotal) * 100 : 0,
+      };
+    });
+  }, [orders]);
 
   return (
     <>
@@ -183,6 +205,34 @@ export function ReportsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Ventas por canal" subtitle="En local vs. online">
+          <div className="space-y-4">
+            {channelBreakdown.map((c) => (
+              <div key={c.channel}>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-foreground">{ORDER_CHANNEL_LABEL[c.channel]}</span>
+                  <span className="font-semibold text-foreground">
+                    {formatCurrencyCompact(c.total)} · {formatNumber(c.count)}{" "}
+                    {c.count === 1 ? "venta" : "ventas"}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${c.pct}%`,
+                      backgroundColor: TONE_COLOR[ORDER_CHANNEL_TONE[c.channel]],
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {orders.length === 0 && (
+              <p className="text-sm text-muted-foreground">Todavía no hay ventas cargadas.</p>
+            )}
           </div>
         </SectionCard>
 

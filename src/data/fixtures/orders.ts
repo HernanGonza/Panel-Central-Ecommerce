@@ -27,6 +27,14 @@ function nextSellerId(storeId: string): string | undefined {
   return sellers[count % sellers.length];
 }
 
+let channelCounter = 0;
+
+/** ~1 de cada 3 ventas entra por el canal online (sin vendedor asignado). */
+function nextChannel(): Order["channel"] {
+  channelCounter += 1;
+  return channelCounter % 3 === 0 ? "online" : "local";
+}
+
 function buildItems(lines: { productId: string; quantity: number }[]): OrderItem[] {
   return lines.map(({ productId, quantity }) => {
     const product = products.find((p) => p.id === productId);
@@ -45,16 +53,18 @@ function order(
 ): Order {
   const items = buildItems(lines);
   const total = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const channel = nextChannel();
   return {
     id,
     storeId,
     customerId,
     customerName: customerName(customerId),
     status,
+    channel,
     items,
     total,
     createdAt: daysAgo(ago),
-    sellerId: nextSellerId(storeId),
+    sellerId: channel === "local" ? nextSellerId(storeId) : undefined,
   };
 }
 

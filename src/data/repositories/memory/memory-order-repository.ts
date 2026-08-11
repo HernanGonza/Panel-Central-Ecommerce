@@ -11,6 +11,7 @@ export const memoryOrderRepository: OrderRepository = {
     let result = orders;
     if (filter?.storeId) result = result.filter((o) => o.storeId === filter.storeId);
     if (filter?.status) result = result.filter((o) => o.status === filter.status);
+    if (filter?.sellerId) result = result.filter((o) => o.sellerId === filter.sellerId);
     return delay(
       [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     );
@@ -19,7 +20,8 @@ export const memoryOrderRepository: OrderRepository = {
     return delay(orders.find((o) => o.id === id));
   },
   async countByStatus(filter) {
-    const scoped = filter?.storeId ? orders.filter((o) => o.storeId === filter.storeId) : orders;
+    let scoped = filter?.storeId ? orders.filter((o) => o.storeId === filter.storeId) : orders;
+    if (filter?.sellerId) scoped = scoped.filter((o) => o.sellerId === filter.sellerId);
     const counts = Object.fromEntries(ORDER_STATUS_ORDER.map((s) => [s, 0])) as Record<
       OrderStatus,
       number

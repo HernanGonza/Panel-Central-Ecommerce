@@ -1,4 +1,4 @@
-import type { OrderStatus } from "@/data/types/order";
+import type { OrderChannel, OrderStatus } from "@/data/types/order";
 import type { InvoiceStatus } from "@/data/types/invoice";
 import type { Role, UserStatus } from "@/data/types/user";
 import type { StoreStatus } from "@/data/types/store";
@@ -10,6 +10,11 @@ export const ORDER_STATUS_TONE: Record<OrderStatus, Tone> = {
   preparando: "gold",
   enviado: "teal",
   entregado: "success",
+};
+
+export const ORDER_CHANNEL_TONE: Record<OrderChannel, Tone> = {
+  local: "teal",
+  online: "clay",
 };
 
 export const INVOICE_STATUS_TONE: Record<InvoiceStatus, Tone> = {

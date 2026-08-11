@@ -2,9 +2,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusPill } from "@/components/shared/StatusPill";
 import { useCustomer } from "@/features/customers/hooks";
 import { useStores } from "@/features/stores/hooks";
+import { useUsers } from "@/features/users/hooks";
 import { useInvoiceByOrder } from "@/features/billing/hooks";
-import { ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, type Order } from "@/data/types";
-import { ORDER_STATUS_TONE, INVOICE_STATUS_TONE } from "@/lib/status-tones";
+import {
+  ORDER_CHANNEL_LABEL,
+  ORDER_STATUS_LABEL,
+  PAYMENT_METHOD_LABEL,
+  type Order,
+} from "@/data/types";
+import { ORDER_CHANNEL_TONE, ORDER_STATUS_TONE, INVOICE_STATUS_TONE } from "@/lib/status-tones";
 import { formatCurrency, formatNumber, formatRelativeDate } from "@/lib/format";
 
 export function OrderDetailDialog({
@@ -16,8 +22,12 @@ export function OrderDetailDialog({
 }) {
   const { data: customer } = useCustomer(order?.customerId);
   const { data: stores = [] } = useStores();
+  const { data: users = [] } = useUsers();
   const { data: invoice } = useInvoiceByOrder(order?.id);
   const storeName = stores.find((s) => s.id === order?.storeId)?.name;
+  const sellerName = order?.sellerId
+    ? (users.find((u) => u.id === order.sellerId)?.name ?? order.sellerId)
+    : undefined;
 
   return (
     <Dialog open={order !== null} onOpenChange={onOpenChange}>
@@ -46,6 +56,20 @@ export function OrderDetailDialog({
                 <div>
                   <dt className="text-xs text-muted-foreground">Fecha</dt>
                   <dd className="text-foreground">{formatRelativeDate(order.createdAt)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Canal</dt>
+                  <dd className="text-foreground">
+                    <StatusPill
+                      label={ORDER_CHANNEL_LABEL[order.channel]}
+                      tone={ORDER_CHANNEL_TONE[order.channel]}
+                      className="mt-0.5"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Vendedor</dt>
+                  <dd className="text-foreground">{sellerName ?? "—"}</dd>
                 </div>
               </dl>
 

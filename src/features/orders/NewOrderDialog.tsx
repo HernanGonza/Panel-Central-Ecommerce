@@ -154,6 +154,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
       customerId: resolvedCustomerId,
       customerName,
       status: values.status,
+      channel: "local",
       items,
       total: orderTotal,
       sellerId: session?.user.id,

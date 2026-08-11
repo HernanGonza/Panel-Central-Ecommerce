@@ -12,14 +12,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useOrders, useOrderStatusCounts } from "@/features/orders/hooks";
 import { useStores } from "@/features/stores/hooks";
+import { useUsers } from "@/features/users/hooks";
 import { OrderDetailDialog } from "@/features/orders/OrderDetailDialog";
-import { ORDER_STATUS_LABEL, ORDER_STATUS_ORDER, type Order, type OrderStatus } from "@/data/types";
-import { ORDER_STATUS_TONE } from "@/lib/status-tones";
+import { useAuth } from "@/auth/useAuth";
+import {
+  ORDER_CHANNEL_LABEL,
+  ORDER_STATUS_LABEL,
+  ORDER_STATUS_ORDER,
+  isOwnerRole,
+  type Order,
+  type OrderStatus,
+} from "@/data/types";
+import { ORDER_CHANNEL_TONE, ORDER_STATUS_TONE } from "@/lib/status-tones";
 import { formatCurrency, formatRelativeDate } from "@/lib/format";
 import { downloadCsv } from "@/lib/csv";
 import { cn } from "@/lib/utils";
+
+const ALL_SELLERS = "__all__";
 
 type SortKey = "id" | "customerName" | "createdAt" | "total";
 type SortState = { key: SortKey; dir: "asc" | "desc" };
@@ -63,15 +81,33 @@ export function OrdersView({
   storeId?: string | undefined;
   headerAction?: ReactNode;
 }) {
+  const { session } = useAuth();
+  const role = session?.user.role;
+  const isVendedor = role === "vendedor";
+  const canFilterSellers = role ? isOwnerRole(role) || role === "gerente" : false;
+  const showSellerColumns = !isVendedor;
+
   const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null);
+  const [sellerFilter, setSellerFilter] = useState<string>(ALL_SELLERS);
   const [sort, setSort] = useState<SortState>({ key: "createdAt", dir: "desc" });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const { data: stores = [] } = useStores();
-  const { data: statusCounts } = useOrderStatusCounts({ storeId });
-  const { data: orders = [] } = useOrders({ storeId, status: statusFilter ?? undefined });
+  const { data: sellers = [] } = useUsers({ storeId });
+
+  // Un vendedor solo ve sus propias ventas; gerente/dueño pueden filtrar por vendedor.
+  const sellerId = isVendedor
+    ? session?.user.id
+    : sellerFilter === ALL_SELLERS
+      ? undefined
+      : sellerFilter;
+
+  const { data: statusCounts } = useOrderStatusCounts({ storeId, sellerId });
+  const { data: orders = [] } = useOrders({ storeId, status: statusFilter ?? undefined, sellerId });
 
   const storeName = (id: string) => stores.find((s) => s.id === id)?.name ?? id;
+  const sellerName = (id: string) => sellers.find((u) => u.id === id)?.name ?? id;
   const totalOrders = statusCounts ? Object.values(statusCounts).reduce((a, b) => a + b, 0) : 0;
+  const columnCount = 5 + (storeId ? 0 : 1) + (showSellerColumns ? 2 : 0);
 
   function toggleSort(key: SortKey) {
     setSort((current) =>
@@ -98,6 +134,8 @@ export function OrdersView({
         { label: "Pedido", key: "id" },
         { label: "Tienda", key: "tienda" },
         { label: "Cliente", key: "cliente" },
+        { label: "Vendedor", key: "vendedor" },
+        { label: "Canal", key: "canal" },
         { label: "Estado", key: "estado" },
         { label: "Fecha", key: "fecha" },
         { label: "Total", key: "total" },
@@ -106,6 +144,8 @@ export function OrdersView({
         id: order.id,
         tienda: storeName(order.storeId),
         cliente: order.customerName,
+        vendedor: order.sellerId ? sellerName(order.sellerId) : "—",
+        canal: ORDER_CHANNEL_LABEL[order.channel],
         estado: ORDER_STATUS_LABEL[order.status],
         fecha: new Date(order.createdAt).toLocaleString("es-AR"),
         total: order.total,
@@ -159,10 +199,27 @@ export function OrdersView({
         title="Pedidos recientes"
         subtitle="Tocá un pedido para ver el detalle del cliente"
         action={
-          <Button type="button" variant="outline" size="sm" onClick={handleExport}>
-            <Download className="size-3.5" />
-            Exportar CSV
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {canFilterSellers && (
+              <Select value={sellerFilter} onValueChange={setSellerFilter}>
+                <SelectTrigger size="sm" className="w-44">
+                  <SelectValue placeholder="Vendedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SELLERS}>Todos los vendedores</SelectItem>
+                  {sellers.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button type="button" variant="outline" size="sm" onClick={handleExport}>
+              <Download className="size-3.5" />
+              Exportar CSV
+            </Button>
+          </div>
         }
       >
         <div className="overflow-x-auto">
@@ -177,6 +234,8 @@ export function OrdersView({
                   sort={sort}
                   onSort={toggleSort}
                 />
+                {showSellerColumns && <TableHead>Vendedor</TableHead>}
+                {showSellerColumns && <TableHead>Canal</TableHead>}
                 <TableHead>Estado</TableHead>
                 <SortableHead label="Fecha" sortKey="createdAt" sort={sort} onSort={toggleSort} />
                 <SortableHead
@@ -202,6 +261,19 @@ export function OrdersView({
                     </TableCell>
                   )}
                   <TableCell className="text-muted-foreground">{order.customerName}</TableCell>
+                  {showSellerColumns && (
+                    <TableCell className="text-muted-foreground">
+                      {order.sellerId ? sellerName(order.sellerId) : "—"}
+                    </TableCell>
+                  )}
+                  {showSellerColumns && (
+                    <TableCell>
+                      <StatusPill
+                        label={ORDER_CHANNEL_LABEL[order.channel]}
+                        tone={ORDER_CHANNEL_TONE[order.channel]}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <StatusPill
                       label={ORDER_STATUS_LABEL[order.status]}
@@ -219,7 +291,7 @@ export function OrdersView({
               {sortedOrders.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={storeId ? 5 : 6}
+                    colSpan={columnCount}
                     className="py-10 text-center text-sm text-muted-foreground"
                   >
                     No hay pedidos que coincidan con el filtro.

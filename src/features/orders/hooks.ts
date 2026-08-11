@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { repositories } from "@/data/repositories";
-import type { StoreScoped } from "@/data/repositories/interfaces";
-import type { Order, OrderStatus } from "@/data/types";
+import type { OrderFilter } from "@/data/repositories/interfaces";
+import type { Order } from "@/data/types";
 
-export function useOrders(filter?: StoreScoped & { status?: OrderStatus | undefined }) {
+export function useOrders(filter?: OrderFilter) {
   return useQuery({
     queryKey: ["orders", filter ?? {}],
     queryFn: () => repositories.orders.list(filter),
   });
 }
 
-export function useOrderStatusCounts(filter?: StoreScoped) {
+export function useOrderStatusCounts(filter?: Omit<OrderFilter, "status">) {
   return useQuery({
     queryKey: ["orders", "status-counts", filter ?? {}],
     queryFn: () => repositories.orders.countByStatus(filter),

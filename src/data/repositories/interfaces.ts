@@ -32,10 +32,16 @@ export interface ProductRepository {
   update(id: string, patch: Partial<Omit<Product, "id">>): Promise<Product>;
 }
 
+/** `sellerId` acota a las ventas cargadas por ese vendedor/gerente — lo usan tanto el panel de un vendedor (forzado a su propio id) como el filtro de "Vendedor" que ven gerente/dueño. */
+export interface OrderFilter extends StoreScoped {
+  status?: OrderStatus | undefined;
+  sellerId?: string | undefined;
+}
+
 export interface OrderRepository {
-  list(filter?: StoreScoped & { status?: OrderStatus | undefined }): Promise<Order[]>;
+  list(filter?: OrderFilter): Promise<Order[]>;
   getById(id: string): Promise<Order | undefined>;
-  countByStatus(filter?: StoreScoped): Promise<Record<OrderStatus, number>>;
+  countByStatus(filter?: Omit<OrderFilter, "status">): Promise<Record<OrderStatus, number>>;
   create(input: Omit<Order, "id" | "createdAt">): Promise<Order>;
 }
 
