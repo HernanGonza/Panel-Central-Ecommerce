@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Quagga from "@ericblade/quagga2";
+import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
+import { BarcodeFormat, DecodeHintType, NotFoundException } from "@zxing/library";
 import { ScanLine } from "lucide-react";
 import {
   Dialog,
@@ -17,6 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const hints = new Map<DecodeHintType, unknown>([
+  [
+    DecodeHintType.POSSIBLE_FORMATS,
+    [BarcodeFormat.CODE_128, BarcodeFormat.EAN_13, BarcodeFormat.EAN_8],
+  ],
+]);
+
 export function BarcodeScannerDialog({
   onDetected,
   trigger,
@@ -28,7 +36,7 @@ export function BarcodeScannerDialog({
   const [error, setError] = useState<string | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const supportsCamera =
     typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
@@ -43,88 +51,75 @@ export function BarcodeScannerDialog({
   }
 
   useEffect(() => {
-    if (!open || !viewportRef.current || !supportsCamera) return;
+    if (!open || !videoRef.current || !supportsCamera) return;
 
     let cancelled = false;
-
-    function handleDetected(result: { codeResult: { code: string | null } }) {
-      const code = result.codeResult.code;
-      if (!code || cancelled) return;
-      cancelled = true;
-      onDetected(code);
-      setOpen(false);
-    }
+    let controls: IScannerControls | null = null;
+    const reader = new BrowserMultiFormatReader(hints);
 
     function onError(err: unknown) {
       console.error("No se pudo iniciar el escáner de código de barras", err);
       const name = (err as { name?: string })?.name;
-      if (name === "NotAllowedError") {
-        setError(
-          "La cámara está bloqueada para este sitio. Habilitala desde el ícono de cámara en la barra de direcciones y volvé a intentar.",
-        );
-      } else {
-        setError("No pudimos acceder a la cámara. Revisá los permisos del navegador.");
-      }
+      setError(
+        name === "NotAllowedError"
+          ? "La cámara está bloqueada para este sitio. Habilitala desde el ícono de cámara en la barra de direcciones y volvé a intentar."
+          : "No pudimos acceder a la cámara. Revisá los permisos del navegador.",
+      );
     }
 
-    function start(constraints: MediaTrackConstraints, allowFallback: boolean) {
-      let settled = false;
-
-      function handleFailure(err: unknown) {
-        if (cancelled || settled) return;
-        settled = true;
+    async function start(constraints: MediaStreamConstraints, allowFallback: boolean) {
+      try {
+        const nextControls = await reader.decodeFromConstraints(
+          constraints,
+          videoRef.current!,
+          (result, err) => {
+            if (cancelled || !result) {
+              if (err && !(err instanceof NotFoundException)) {
+                console.warn("Error al decodificar el código de barras", err);
+              }
+              return;
+            }
+            cancelled = true;
+            nextControls?.stop();
+            onDetected(result.getText());
+            setOpen(false);
+          },
+        );
+        if (cancelled) {
+          nextControls.stop();
+          return;
+        }
+        controls = nextControls;
+        BrowserMultiFormatReader.listVideoInputDevices()
+          .then((list) => {
+            if (!cancelled) setDevices(list);
+          })
+          .catch(() => undefined);
+      } catch (err) {
+        if (cancelled) return;
         // Laptops usually have no "environment"-facing camera; fall back to
         // whatever default camera is available (e.g. the built-in webcam).
         if (allowFallback) {
-          start({}, false);
+          start({ video: true, audio: false }, false);
           return;
         }
         onError(err);
       }
-
-      Quagga.init(
-        {
-          inputStream: {
-            type: "LiveStream",
-            target: viewportRef.current ?? undefined,
-            constraints,
-          },
-          decoder: { readers: ["code_128_reader", "ean_reader", "ean_8_reader"] },
-          locate: true,
-        },
-        (err) => {
-          if (cancelled || settled) return;
-          if (err) {
-            handleFailure(err);
-            return;
-          }
-          settled = true;
-          Quagga.start();
-          Quagga.onDetected(handleDetected);
-          navigator.mediaDevices
-            ?.enumerateDevices()
-            .then((list) => {
-              if (cancelled) return;
-              setDevices(list.filter((d) => d.kind === "videoinput"));
-            })
-            .catch(() => undefined);
-        },
-      )?.catch((err) => {
-        // Some Quagga2 failure paths (e.g. permission denied) reject the
-        // returned promise without ever invoking the callback above.
-        handleFailure(err);
-      });
     }
 
     start(
-      deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: "environment" } },
+      {
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { facingMode: { ideal: "environment" } },
+        audio: false,
+      },
       deviceId === null,
     );
 
     return () => {
       cancelled = true;
-      Quagga.offDetected(handleDetected);
-      Quagga.stop();
+      controls?.stop();
     };
   }, [open, deviceId, onDetected, supportsCamera]);
 
@@ -146,16 +141,16 @@ export function BarcodeScannerDialog({
         <DialogHeader>
           <DialogTitle>Escanear código de barras</DialogTitle>
         </DialogHeader>
-        {displayError ? (
+        <div
+          className={`relative aspect-video overflow-hidden rounded-xl bg-black ${displayError ? "hidden" : ""}`}
+        >
+          <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
+        </div>
+        {displayError && (
           <p className="py-6 text-center text-sm text-muted-foreground">{displayError}</p>
-        ) : (
-          <div
-            ref={viewportRef}
-            className="relative aspect-video overflow-hidden rounded-xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover [&>canvas]:hidden"
-          />
         )}
         {devices.length > 1 && (
-          <Select value={deviceId ?? devices[0]?.deviceId} onValueChange={setDeviceId}>
+          <Select value={deviceId ?? devices[0]!.deviceId} onValueChange={setDeviceId}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Elegir cámara" />
             </SelectTrigger>
