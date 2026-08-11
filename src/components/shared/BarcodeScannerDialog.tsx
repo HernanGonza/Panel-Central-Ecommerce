@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType, NotFoundException } from "@zxing/library";
 import { ScanLine } from "lucide-react";
@@ -36,7 +36,12 @@ export function BarcodeScannerDialog({
   const [error, setError] = useState<string | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // A ref callback (not useRef) is required here: Radix's Dialog mounts its
+  // content one render cycle after `open` flips, so a plain ref would still
+  // be null in the effect that reacts to `open` becoming true. The callback
+  // fires exactly when the node attaches and triggers a re-render via state,
+  // which re-runs the effect below.
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
 
   const supportsCamera =
     typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
@@ -51,11 +56,28 @@ export function BarcodeScannerDialog({
   }
 
   useEffect(() => {
-    if (!open || !videoRef.current || !supportsCamera) return;
+    if (!open || !videoEl || !supportsCamera) return;
+    const video = videoEl;
 
     let cancelled = false;
     let controls: IScannerControls | null = null;
     const reader = new BrowserMultiFormatReader(hints);
+
+    // @zxing/library logs every not-found frame as "non-ReaderException" because
+    // NotFoundException doesn't extend ReaderException internally — that's just
+    // scanner noise (no barcode in view yet), not an actual problem, so mute it
+    // for the duration of the scan.
+    const originalWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      if (
+        typeof args[0] === "string" &&
+        args[0].startsWith("MultiFormatReader: non-ReaderException") &&
+        args[1] instanceof NotFoundException
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
 
     function onError(err: unknown) {
       console.error("No se pudo iniciar el escáner de código de barras", err);
@@ -71,7 +93,7 @@ export function BarcodeScannerDialog({
       try {
         const nextControls = await reader.decodeFromConstraints(
           constraints,
-          videoRef.current!,
+          video,
           (result, err) => {
             if (cancelled || !result) {
               if (err && !(err instanceof NotFoundException)) {
@@ -120,8 +142,9 @@ export function BarcodeScannerDialog({
     return () => {
       cancelled = true;
       controls?.stop();
+      console.warn = originalWarn;
     };
-  }, [open, deviceId, onDetected, supportsCamera]);
+  }, [open, deviceId, onDetected, supportsCamera, videoEl]);
 
   const displayError = !supportsCamera
     ? "El navegador no permite acceder a la cámara acá. Necesita conexión HTTPS (o localhost)."
@@ -144,7 +167,7 @@ export function BarcodeScannerDialog({
         <div
           className={`relative aspect-video overflow-hidden rounded-xl bg-black ${displayError ? "hidden" : ""}`}
         >
-          <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
+          <video ref={setVideoEl} className="h-full w-full object-cover" muted playsInline />
         </div>
         {displayError && (
           <p className="py-6 text-center text-sm text-muted-foreground">{displayError}</p>
