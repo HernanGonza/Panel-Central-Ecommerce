@@ -1,13 +1,48 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { toast } from "sonner";
+import { Bell, BellOff, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/auth/useAuth";
+import { notificationPermission, requestNotificationPermission } from "@/lib/notifications";
 
 export interface SidebarNavItem {
   to: string;
   label: string;
   icon: ReactNode;
+}
+
+function NotificationToggle() {
+  const [permission, setPermission] = useState(notificationPermission());
+
+  if (permission === "unsupported") return null;
+
+  async function handleClick() {
+    if (permission === "granted") {
+      toast.info("Las notificaciones ya están activadas para esta app.");
+      return;
+    }
+    if (permission === "denied") {
+      toast.error(
+        "Están bloqueadas desde el navegador. Activalas desde la configuración del sitio.",
+      );
+      return;
+    }
+    const next = await requestNotificationPermission();
+    setPermission(next);
+    if (next === "granted") toast.success("Notificaciones activadas.");
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+      title={permission === "granted" ? "Notificaciones activadas" : "Activar notificaciones"}
+    >
+      {permission === "granted" ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+    </button>
+  );
 }
 
 export function Sidebar({
@@ -52,14 +87,17 @@ export function Sidebar({
           <p className="truncate text-sm font-medium text-foreground">{session?.user.name}</p>
           <p className="truncate text-xs text-muted-foreground">{session?.user.role}</p>
         </div>
-        <button
-          type="button"
-          onClick={logout}
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          title="Cerrar sesión"
-        >
-          <LogOut className="size-4" />
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <NotificationToggle />
+          <button
+            type="button"
+            onClick={logout}
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            title="Cerrar sesión"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
       </div>
     </aside>
   );

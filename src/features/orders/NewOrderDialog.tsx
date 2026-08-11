@@ -21,12 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProducts } from "@/features/products/hooks";
+import { useProducts, useUpdateProduct } from "@/features/products/hooks";
 import { useCreateCustomer, useCustomers } from "@/features/customers/hooks";
 import { useCreateOrder } from "@/features/orders/hooks";
 import { useCreateInvoice } from "@/features/billing/hooks";
 import { useAuth } from "@/auth/useAuth";
 import {
+  LOW_STOCK_THRESHOLD,
   ORDER_STATUS_LABEL,
   ORDER_STATUS_ORDER,
   PAYMENT_METHOD_LABEL,
@@ -35,6 +36,7 @@ import {
   type PaymentMethod,
 } from "@/data/types";
 import { formatCurrency } from "@/lib/format";
+import { showNotification } from "@/lib/notifications";
 
 const NEW_CUSTOMER = "__new__";
 
@@ -73,6 +75,7 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
   const createOrder = useCreateOrder();
   const createCustomer = useCreateCustomer();
   const createInvoice = useCreateInvoice();
+  const updateProduct = useUpdateProduct();
 
   const form = useForm<FormValues>({ defaultValues: emptyDefaults });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "lines" });
@@ -164,6 +167,19 @@ export function NewOrderDialog({ storeId }: { storeId: string }) {
       date: new Date().toISOString(),
       orderId: order.id,
     });
+
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) continue;
+      const nextStock = Math.max(0, product.stock - item.quantity);
+      await updateProduct.mutateAsync({ id: product.id, patch: { stock: nextStock } });
+      if (nextStock < LOW_STOCK_THRESHOLD) {
+        void showNotification("Stock bajo", {
+          body: `${product.name} quedó con ${nextStock} unidades.`,
+          tag: `low-stock-${product.id}`,
+        });
+      }
+    }
 
     toast.success(`Venta cargada para ${customerName} · comprobante ${invoice.id}`);
     form.reset(emptyDefaults);
